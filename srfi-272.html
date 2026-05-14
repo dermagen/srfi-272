@@ -19,7 +19,7 @@ SPDX-License-Identifier: MIT
     </style>
   </head>
   <body>
-    <h1><a href="https://srfi.schemers.org/"><img class="srfi-logo" src="https://srfi.schemers.org/srfi-logo.svg" 
+    <h1><a href="https://srfi.schemers.org/"><img class="srfi-logo" src="https://srfi.schemers.org/srfi-logo.svg"
     alt="SRFI surfboard logo" /></a>272: Pretty Printing</h1>
 
 <p>by Sergei Egorov</p>
@@ -35,19 +35,19 @@ The editor will add this section.</p>
 <h2 id="abstract">Abstract</h2>
 
 <p>
-  This SRFI follows the traditional Scheme model of pretty printing, which treats it as a 
-  process distinct from general controlled formatting. While general-purpose formatters 
-  often prioritize specialized presentation at the expense of machine-readability, Scheme’s 
-  pretty-printers (such as those of SLIB and MIT Scheme) have traditionally treated 
-  pretty printing as a variant of <code>write</code>, differing primarily in the insertion 
-  of whitespace to make the presentation more palatable to humans. Common Lisp’s pretty-printer, 
-  by contrast, fills two roles simultaneously by integrating pretty printing with both its 
-  format facility and its generalized <code>write</code> procedures. This unified approach 
+  This SRFI follows the traditional Scheme model of pretty printing, which treats it as a
+  process distinct from general controlled formatting. While general-purpose formatters
+  often prioritize specialized presentation at the expense of machine-readability, Scheme’s
+  pretty-printers (such as those of SLIB and MIT Scheme) have traditionally treated
+  pretty printing as a variant of <code>write</code>, differing primarily in the insertion
+  of whitespace to make the presentation more palatable to humans. Common Lisp’s pretty-printer,
+  by contrast, fills two roles simultaneously by integrating pretty printing with both its
+  format facility and its generalized <code>write</code> procedures. This unified approach
   offers great power, but at the cost of complexity that can make it difficult to use effectively.
 
-  We propose a specialized, layered approach, specifying five libraries of increasing functionality, 
-  where all but the first are optional. The libraries are downward-compatible: more powerful libraries 
-  satisfy all requirements of the simpler ones while adding new features. Implementors may 
+  We propose a specialized, layered approach, specifying five libraries of increasing functionality,
+  where all but the first are optional. The libraries are downward-compatible: more powerful libraries
+  satisfy all requirements of the simpler ones while adding new features. Implementors may
   choose to support a maximum level of functionality appropriate for their systems. Integration with
   monadic and string-based formatting libraries is supported.
 </p>
@@ -59,126 +59,126 @@ The editor will add this section.</p>
 <h2 id="rationale">Rationale</h2>
 
 <p>
-  Pretty printing in Lisp traces its origins to the late 1960s with GRIND [<a href="#ref1">1</a>], a tool 
-  designed to ‘grind’ function definitions into human-readable form for inspection and debugging. 
-  Because Lisp consists entirely of S-expressions, early pretty printers could rely on 
+  Pretty printing in Lisp traces its origins to the late 1960s with GRIND [<a href="#ref1">1</a>], a tool
+  designed to ‘grind’ function definitions into human-readable form for inspection and debugging.
+  Because Lisp consists entirely of S-expressions, early pretty printers could rely on
   straightforward structural analysis of S-expression nesting
-  rather than on complex syntactic knowledge. This regularity made it possible to format code 
-  consistently with relatively simple algorithms, establishing pretty printing as a specialized 
+  rather than on complex syntactic knowledge. This regularity made it possible to format code
+  consistently with relatively simple algorithms, establishing pretty printing as a specialized
   activity distinct from ordinary output.
 </p>
 
 <p>
-  As Lisp dialects matured, two philosophical approaches emerged. The specialized approach, 
-  found in MacLisp, Interlisp, and later in systems such as MIT Scheme and those using SLIB, 
-  treated pretty printing as a variant of write whose purpose was to preserve machine-readability 
-  while improving human readability through strategic whitespace. Output from these pretty printers 
-  could always be read back by the Lisp reader to reconstruct an equal object, giving users 
-  predictability, composability, and easy integration with editors like Emacs. This tradition 
-  recognized that pretty printing served a narrow purpose: making code and data comprehensible 
+  As Lisp dialects matured, two philosophical approaches emerged. The specialized approach,
+  found in MacLisp, Interlisp, and later in systems such as MIT Scheme and those using SLIB,
+  treated pretty printing as a variant of write whose purpose was to preserve machine-readability
+  while improving human readability through strategic whitespace. Output from these pretty printers
+  could always be read back by the Lisp reader to reconstruct an equal object, giving users
+  predictability, composability, and easy integration with editors like Emacs. This tradition
+  recognized that pretty printing served a narrow purpose: making code and data comprehensible
   to programmers, not generating reports, tables, or prose.
 </p>
 
 <p>
-  Common Lisp chose a different path, deeply integrating pretty printing with <code>format</code> 
-  and <code>write</code> variants through the <code>*print-pretty*</code> dynamic variable and 
-  related printer controls. Influenced by work at Xerox PARC and codified in Common Lisp standard, 
-  this integrated approach offered pretty printer dispatch tables, logical blocks for grouping 
-  and conditional line breaks, format directives such as <code>~&lt;</code>..<code>~&gt;</code>, 
-  and XP-style constraint-satisfaction formatting that optimized aesthetic criteria when choosing 
-  line breaks. The motivation was a single powerful framework capable of handling everything from 
-  debug output to complex document generation, allowing users to employ one system regardless 
+  Common Lisp chose a different path, deeply integrating pretty printing with <code>format</code>
+  and <code>write</code> variants through the <code>*print-pretty*</code> dynamic variable and
+  related printer controls. Influenced by work at Xerox PARC and codified in Common Lisp standard,
+  this integrated approach offered pretty printer dispatch tables, logical blocks for grouping
+  and conditional line breaks, format directives such as <code>~&lt;</code>..<code>~&gt;</code>,
+  and XP-style constraint-satisfaction formatting that optimized aesthetic criteria when choosing
+  line breaks. The motivation was a single powerful framework capable of handling everything from
+  debug output to complex document generation, allowing users to employ one system regardless
   of whether they were printing data, generating source code, or producing formatted reports.
 </p>
 
 <p>
-  That power came at a cost. The interaction between <code>~&lt;</code>, <code>~@&lt;</code>, 
-  <code>~:@&lt;</code>, and other format combinations proved notoriously difficult to master, 
-  creating a steep learning curve. The generality of the system imposed overhead even for 
-  simple cases, and conforming implementations demanded substantial engineering effort that 
-  some implementors chose not to undertake. In practice, most programs either used basic <code>write</code> 
-  with <code>*print-pretty*</code> set to true or avoided the sophisticated features entirely, 
+  That power came at a cost. The interaction between <code>~&lt;</code>, <code>~@&lt;</code>,
+  <code>~:@&lt;</code>, and other format combinations proved notoriously difficult to master,
+  creating a steep learning curve. The generality of the system imposed overhead even for
+  simple cases, and conforming implementations demanded substantial engineering effort that
+  some implementors chose not to undertake. In practice, most programs either used basic <code>write</code>
+  with <code>*print-pretty*</code> set to true or avoided the sophisticated features entirely,
   leaving much of the machinery unused.
 </p>
 
 <p>
-  Scheme, adhering to its minimalist philosophy, largely sidestepped this complexity. 
-  Early Scheme reports did not specify a pretty printer, leaving implementations to devise 
-  their own solutions. MIT Scheme provided pp as a straightforward command for code formatting, 
-  SLIB offered portable pretty printing, Chez Scheme included customizable rules for special 
-  forms, and Racket developed its own library. The community generally favored specialized 
+  Scheme, adhering to its minimalist philosophy, largely sidestepped this complexity.
+  Early Scheme reports did not specify a pretty printer, leaving implementations to devise
+  their own solutions. MIT Scheme provided pp as a straightforward command for code formatting,
+  SLIB offered portable pretty printing, Chez Scheme included customizable rules for special
+  forms, and Racket developed its own library. The community generally favored specialized
   tools over monolithic frameworks, reflecting a broader preference for small, composable utilities.
 </p>
 
 <p>
-  More recently, <a href="https://srfi.schemers.org/srfi-166/">SRFI 166</a> introduced 
-  monadic formatting inspired by Haskell's printing libraries. It uses functional combinators 
-  rather than special variables or dispatch tables, treats formatting as a monadic computation, 
-  and can target multiple backends. While it includes pretty printing capabilities, it is 
-  fundamentally a formatting framework first and a pretty-printer second, demonstrating the 
-  persistent tension between specialized and integrated approaches. Its sophistication 
-  requires understanding the combinator model, which may be excessive for users who simply 
+  More recently, <a href="https://srfi.schemers.org/srfi-166/">SRFI 166</a> introduced
+  monadic formatting inspired by Haskell's printing libraries. It uses functional combinators
+  rather than special variables or dispatch tables, treats formatting as a monadic computation,
+  and can target multiple backends. While it includes pretty printing capabilities, it is
+  fundamentally a formatting framework first and a pretty-printer second, demonstrating the
+  persistent tension between specialized and integrated approaches. Its sophistication
+  requires understanding the combinator model, which may be excessive for users who simply
   want nicely formatted Scheme code.
 </p>
 
 <p>
-  These competing visions raise genuine questions about whether pretty printing and general 
-  formatting should remain separate. Pretty-printing Scheme code demands machine-readable output, 
-  adherence to established conventions like keyword alignment, and focus on code structure. 
-  General formatting often prioritizes human readability, custom layouts, and rich text features 
-  such as tables and columns, goals that can conflict with code-oriented decisions. 
-  A specialized pretty printer can offer a simple API like <code>pp</code> with no need for format strings, 
-  combinators, or dispatch mechanisms, making it valuable for quickly inspecting data or 
-  formatting code. It can also be highly optimized for S-expressions, using specialized 
-  algorithms for width measurement and line breaking without carrying the overhead of 
-  generality. Separation of concerns further eases maintenance, allowing code pretty printing 
+  These competing visions raise genuine questions about whether pretty printing and general
+  formatting should remain separate. Pretty-printing Scheme code demands machine-readable output,
+  adherence to established conventions like keyword alignment, and focus on code structure.
+  General formatting often prioritizes human readability, custom layouts, and rich text features
+  such as tables and columns, goals that can conflict with code-oriented decisions.
+  A specialized pretty printer can offer a simple API like <code>pp</code> with no need for format strings,
+  combinators, or dispatch mechanisms, making it valuable for quickly inspecting data or
+  formatting code. It can also be highly optimized for S-expressions, using specialized
+  algorithms for width measurement and line breaking without carrying the overhead of
+  generality. Separation of concerns further eases maintenance, allowing code pretty printing
   conventions to evolve independently of document formatting.
 </p>
 
 <p>
-  Yet integration has its own merits. A unified system ensures consistent behavior across all 
-  output operations, sparing users from learning multiple models. Formatting combinators, 
-  dispatch mechanisms, and layout algorithms can be shared between pretty printing and general 
-  formatting, reducing overall code size. An integrated system handles hybrid cases more 
-  naturally, such as data structures containing both code and human-readable text, or documents 
-  that include pretty-printed code examples. Dispatch tables also let users define custom formatting 
+  Yet integration has its own merits. A unified system ensures consistent behavior across all
+  output operations, sparing users from learning multiple models. Formatting combinators,
+  dispatch mechanisms, and layout algorithms can be shared between pretty printing and general
+  formatting, reducing overall code size. An integrated system handles hybrid cases more
+  naturally, such as data structures containing both code and human-readable text, or documents
+  that include pretty-printed code examples. Dispatch tables also let users define custom formatting
   for new data types uniformly, whether those types represent code, data, or documents.
 </p>
 
 <p>
   In this SRFI we propose a bare-bones <code>(srfi 272)</code> pretty printing library, accompanied
-  by optional libraries of increasing functionality: <code>(srfi 272 basic)</code>, 
-  <code>(srfi 272 intermediate)</code>, <code>(srfi 272 advanced)</code>, and 
-  <code>(srfi 272 fancy)</code>. 
+  by optional libraries of increasing functionality: <code>(srfi 272 basic)</code>,
+  <code>(srfi 272 intermediate)</code>, <code>(srfi 272 advanced)</code>, and
+  <code>(srfi 272 fancy)</code>.
 
-  This layered design directly addresses the tension between these approaches by allowing flexible 
-  implementation strategies that suit different needs and constraints. For example, the first 
-  four libraries could be implemented as ‘views’ of the fifth, re-exporting progressively 
-  larger sets of identifiers. Alternatively, the first three libraries could be implemented 
+  This layered design directly addresses the tension between these approaches by allowing flexible
+  implementation strategies that suit different needs and constraints. For example, the first
+  four libraries could be implemented as ‘views’ of the fifth, re-exporting progressively
+  larger sets of identifiers. Alternatively, the first three libraries could be implemented
   by remapping their interfaces to an existing library, with the last two libraries omitted.
-  Yet another approach is to implement each library separately, so that no unnecessary code 
-  is loaded or linked into an application. This progressive structure acknowledges that different 
+  Yet another approach is to implement each library separately, so that no unnecessary code
+  is loaded or linked into an application. This progressive structure acknowledges that different
   use cases have legitimately different needs rather than forcing all formatting through a single model.
 </p>
 
 <p>
-  The proposal is intended to cover a wide range of pretty printing workflows. The bare-bones 
-  and basic libraries serve the common case of quickly inspecting data structures or formatting 
-  code with a simple API. The intermediate and advanced layers add richer control over presentation, 
-  including custom rendering styles for various Scheme constructs. At the highest level, the fancy 
-  library provides output to color-capable terminals and other enhanced capabilities. The specification 
-  for file-based pretty printing includes provisions for preserving comments, addressing a practical 
+  The proposal is intended to cover a wide range of pretty printing workflows. The bare-bones
+  and basic libraries serve the common case of quickly inspecting data structures or formatting
+  code with a simple API. The intermediate and advanced layers add richer control over presentation,
+  including custom rendering styles for various Scheme constructs. At the highest level, the fancy
+  library provides output to color-capable terminals and other enhanced capabilities. The specification
+  for file-based pretty printing includes provisions for preserving comments, addressing a practical
   need that simple pretty-printers have historically neglected.
 </p>
 
 <p>
-  Furthermore, this design does not force integration with general formatting frameworks but 
+  Furthermore, this design does not force integration with general formatting frameworks but
   enables it where desired.
   The <code>make-pprint-generator</code> procedure in the advanced library may be used by
   <a href="https://srfi.schemers.org/srfi-166/">SRFI 166</a> implementations to integrate
-  the proposed advanced pretty printer into its framework. This provides a bridge between 
-  the specialized and integrated worlds, allowing Scheme systems to offer a simple pretty printing API 
-  for most users while permitting sophisticated composition with monadic formatters when the 
+  the proposed advanced pretty printer into its framework. This provides a bridge between
+  the specialized and integrated worlds, allowing Scheme systems to offer a simple pretty printing API
+  for most users while permitting sophisticated composition with monadic formatters when the
   full power of SRFI 166 is warranted. Below is an example of how such an integration might look:
 </p>
 
@@ -203,9 +203,9 @@ The editor will add this section.</p>
 <p>
   <small>
   Note: Although the exact details of how S-expressions are pretty-printed are not specified,
-  many points in this SRFI implicitly assume that a conventional Lisp/Scheme structural layout 
-  is used. Its main features are: a single space for horizontal separation, no whitespace after 
-  an opening parenthesis or before a closing parenthesis, and indentation that follows the 
+  many points in this SRFI implicitly assume that a conventional Lisp/Scheme structural layout
+  is used. Its main features are: a single space for horizontal separation, no whitespace after
+  an opening parenthesis or before a closing parenthesis, and indentation that follows the
   nesting of subexpressions. The References section contains links to relevant style guidelines.
   </small>
 </p>
@@ -230,19 +230,19 @@ be prefixed with a colon, e.g. <code>(srfi :272 basic)</code>.
   <code>(<b>pp</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>port</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  Writes a pretty-printed representation of &langle;<i>obj</i>&thinsp;&rangle; to the given port. If the port argument is missing, the value of 
-  <code>(current-output-port)</code> is used. Whitespace is used to format the output within a system-dependent 
-  column width. This width may depend on characteristics of the output port, such as the current width 
+  Writes a pretty-printed representation of &langle;<i>obj</i>&thinsp;&rangle; to the given port. If the port argument is missing, the value of
+  <code>(current-output-port)</code> is used. Whitespace is used to format the output within a system-dependent
+  column width. This width may depend on characteristics of the output port, such as the current width
   of a terminal window, and may thus vary between calls. Alternatively, it may be a fixed internal value.
-  This width is a soft limit; the printer may write past the margin when printing indivisible tokens 
-  (such as large exact numbers or symbols). 
+  This width is a soft limit; the printer may write past the margin when printing indivisible tokens
+  (such as large exact numbers or symbols).
 </p>
 
 <p>
   This library provides no guarantee of termination when printing objects that contain circular references.
-  For non-circular objects, it provides the same machine-readability guarantees as the implementation’s 
-  <code>write</code> procedure. If an object can be written by <code>write</code> and then read back 
-  by <code>read</code> to produce an equal object, then <code>pp</code> must also generate output 
+  For non-circular objects, it provides the same machine-readability guarantees as the implementation’s
+  <code>write</code> procedure. If an object can be written by <code>write</code> and then read back
+  by <code>read</code> to produce an equal object, then <code>pp</code> must also generate output
   that can be read back to produce an equal object.
 </p>
 
@@ -250,27 +250,27 @@ be prefixed with a colon, e.g. <code>(srfi :272 basic)</code>.
   When producing its output, <code>pp</code> can assume that it is called right after a newline or
   at the very first position of the output port. If this condition does not hold, the output
   may be aligned incorrectly. The output is always followed by a terminating newline ending
-  the last line of the &langle;<i>obj</i>&thinsp;&rangle; representation. 
+  the last line of the &langle;<i>obj</i>&thinsp;&rangle; representation.
 </p>
 
 <h3>The <code>(srfi 272 basic)</code> library</h3>
 
 <p>
 This optional library provides all the functionality of the <code>(srfi 272)</code> library,
-adding the procedures and parameters described below. 
+adding the procedures and parameters described below.
 
-The <code>pp</code> procedure maintains the same requirements and guarantees as described above 
-in matters not related to the right margin and printing of shared and circular references. 
+The <code>pp</code> procedure maintains the same requirements and guarantees as described above
+in matters not related to the right margin and printing of shared and circular references.
 For these matters, it behaves as specified in the parameter descriptions below.
 </p>
 
 <p>
   <code><b>pp-width</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
-  If set to an exact positive integer, this parameter specifies a soft right margin for <code>pp</code>, 
-  measured in columns. For non-fixed-width fonts, a column is approximated by a standard unit 
-  (e.g., ‘en’, the width of an en-dash). Some implementations may support values other than 
-  exact positive integers; their interpretation is implementation-dependent. 
+  If set to an exact positive integer, this parameter specifies a soft right margin for <code>pp</code>,
+  measured in columns. For non-fixed-width fonts, a column is approximated by a standard unit
+  (e.g., ‘en’, the width of an en-dash). Some implementations may support values other than
+  exact positive integers; their interpretation is implementation-dependent.
   The default value is implementation-dependent.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i> Width values observed in existing pretty printers are
   in 72&ndash;80 range.
@@ -279,19 +279,19 @@ For these matters, it behaves as specified in the parameter descriptions below.
 <p>
   <code><b>pp-graph</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
-  If set to a true value, this parameter forces <code>pp</code> to use datum labels 
-  (i.e. <code>#</code><i>N</i>&thinsp;<code>=</code> and <code>#</code><i>N</i>&thinsp;<code>#</code>) 
+  If set to a true value, this parameter forces <code>pp</code> to use datum labels
+  (i.e. <code>#</code><i>N</i>&thinsp;<code>=</code> and <code>#</code><i>N</i>&thinsp;<code>#</code>)
   to represent both shared and circular references. The default value is <code>#f</code>.
 </p>
 
 <p>
   <code><b>pp-circle</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
-  This parameter is ignored if the <code>pp-graph</code> parameter is true. 
-  If <code>pp-graph</code> is <code>#f</code> and <code>pp-circle</code> is true, <code>pp</code> 
-  is forced to use datum labels to represent circular references only. 
-  If both <code>pp-graph</code> and <code>pp-circle</code> are set to <code>#f</code>, <code>pp</code> 
-  may fail to terminate when printing an object containing circular references. 
+  This parameter is ignored if the <code>pp-graph</code> parameter is true.
+  If <code>pp-graph</code> is <code>#f</code> and <code>pp-circle</code> is true, <code>pp</code>
+  is forced to use datum labels to represent circular references only.
+  If both <code>pp-graph</code> and <code>pp-circle</code> are set to <code>#f</code>, <code>pp</code>
+  may fail to terminate when printing an object containing circular references.
   The default value is <code>#t</code>.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;<i>Note:</i> Some existing pretty printers may not be able to
   print only circular references; they always print circular and shared references
@@ -305,9 +305,9 @@ For these matters, it behaves as specified in the parameter descriptions below.
   <code>(<b>pprint</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>port</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  Behaves as R7RS <code>write</code> with respect to shared and circular references (but see the Note above). 
-  This is analogous to <code>pp</code> called in a context where <code>pp-graph</code> is <code>#f</code> and 
-  <code>pp-circle</code> is true. 
+  Behaves as R7RS <code>write</code> with respect to shared and circular references (but see the Note above).
+  This is analogous to <code>pp</code> called in a context where <code>pp-graph</code> is <code>#f</code> and
+  <code>pp-circle</code> is true.
   Current values of the <code>pp-graph</code> and <code>pp-circle</code> are neither used nor affected.
 </p>
 
@@ -317,7 +317,7 @@ For these matters, it behaves as specified in the parameter descriptions below.
   <code>(<b>pprint-shared</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>port</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  Behaves as R7RS <code>write-shared</code> with respect to shared and circular references. 
+  Behaves as R7RS <code>write-shared</code> with respect to shared and circular references.
   Analogous to <code>pp</code> called with <code>pp-graph</code> set to true.
   Current values of the <code>pp-graph</code> and <code>pp-circle</code> are neither used nor affected.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;This procedure is usually faster than <code>pprint</code>.
@@ -329,7 +329,7 @@ For these matters, it behaves as specified in the parameter descriptions below.
   <code>(<b>pprint-simple</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>port</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  Behaves as R7RS <code>write-simple</code> with respect to shared and circular references. 
+  Behaves as R7RS <code>write-simple</code> with respect to shared and circular references.
   Analogous to <code>pp</code> called with <code>pp-graph</code> and <code>pp-circle</code> set to <code>#f</code>.
   Current values of the <code>pp-graph</code> and <code>pp-circle</code> are neither used nor affected.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;This procedure may loop indefinitely on circular objects. The reason it is offered is
@@ -345,8 +345,8 @@ adding the arguments and parameters described below. The set of available functi
 intersection of what is usually included in intermediate pretty-printers and, in many cases, can be
 mapped directly to existing implementation-specific libraries.
 
-The <code>pp</code> procedure maintains the same requirements and guarantees as specified previously, 
-except in matters related to the printing of numbers and the imposition of level/length limits 
+The <code>pp</code> procedure maintains the same requirements and guarantees as specified previously,
+except in matters related to the printing of numbers and the imposition of level/length limits
 on the output. For these matters, it behaves as specified in the parameter descriptions below.
 </p>
 
@@ -357,25 +357,25 @@ on the output. For these matters, it behaves as specified in the parameter descr
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
   This extended variant of <code>pp</code> accepts additional keyword arguments in the
-  form of alternating key and value expressions. Each key expression must evaluate to a parameter object available through 
-  this library (normally, they are just names of the parameters). Each value expression must evaluate to an object 
+  form of alternating key and value expressions. Each key expression must evaluate to a parameter object available through
+  this library (normally, they are just names of the parameters). Each value expression must evaluate to an object
   acceptable as a value for the preceding parameter.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;When determining the value for a parameter, <code>pp</code> first scans its keyword arguments 
-  from left to right. If a keyword equal to the parameter is found, the value following it is used; otherwise, the value 
+  &nbsp;&nbsp;&nbsp;&nbsp;When determining the value for a parameter, <code>pp</code> first scans its keyword arguments
+  from left to right. If a keyword equal to the parameter is found, the value following it is used; otherwise, the value
   stored in the parameter itself is used.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;<i>Rationale:</i> This provides an alternative to wrapping a call to <code>pp</code> in 
+  &nbsp;&nbsp;&nbsp;&nbsp;<i>Rationale:</i> This provides an alternative to wrapping a call to <code>pp</code> in
   <code>parameterize</code>. It enables procedural abstractions, such as bundling parameters into configuration lists.
 </p>
 
 <p>
-  <code>(<b>pp*</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>keyword argument</i>&hellip;&rangle; 
+  <code>(<b>pp*</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>keyword argument</i>&hellip;&rangle;
   &langle;<i>keyword argument list</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br/>
   <code>(<b>pp*</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>port</i>&thinsp;&rangle; &langle;<i>keyword argument</i>&hellip;&rangle;
   &langle;<i>keyword argument list</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  This variant of <code>pp</code> accepts keyword arguments followed by a final expression that must evaluate to a proper 
-  list of alternating keys and values. This final list is effectively ‘spliced’ into the call, as if its contents were 
+  This variant of <code>pp</code> accepts keyword arguments followed by a final expression that must evaluate to a proper
+  list of alternating keys and values. This final list is effectively ‘spliced’ into the call, as if its contents were
   passed to pp via <code>apply</code>. Example:
 </p>
 
@@ -394,7 +394,7 @@ on the output. For these matters, it behaves as specified in the parameter descr
 </code></pre>
 
 <p>
-Note: The extended versions of <code>pp</code> gain no new printing behavior from the keyword argument mechanism itself; 
+Note: The extended versions of <code>pp</code> gain no new printing behavior from the keyword argument mechanism itself;
 changes in behavior depend only on the parameter values, not on the method by which they are supplied.
 </p>
 
@@ -412,9 +412,9 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>pprint-simple</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>port</i>&thinsp;&rangle; &langle;<i>keyword argument</i>&hellip;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  The <code>pprint</code>, <code>pprint-shared</code>, and <code>pprint-simple</code> procedures in this library are 
-  also extended to accept keyword arguments (but not a final keyword argument list; <code>apply</code> should be used 
-  for that purpose). The values for <code>pp-graph</code> and <code>pp-circle</code> that are hardwired into these 
+  The <code>pprint</code>, <code>pprint-shared</code>, and <code>pprint-simple</code> procedures in this library are
+  also extended to accept keyword arguments (but not a final keyword argument list; <code>apply</code> should be used
+  for that purpose). The values for <code>pp-graph</code> and <code>pp-circle</code> that are hardwired into these
   procedures take precedence over any values supplied via keyword arguments or parameters.
 </p>
 
@@ -426,14 +426,14 @@ changes in behavior depend only on the parameter values, not on the method by wh
 
   This procedure reads code expressions from a text file named &langle;<i>infile</i>&thinsp;&rangle; (a string), and
   pretty prints the expressions it reads to a new text file named &langle;<i>outfile</i>&thinsp;&rangle; (also a string).
-  If &langle;<i>outfile</i>&thinsp;&rangle; is not specified, 
-  the output is directed to the value of <code>(current-output-port)</code>. This procedure can be configured with 
+  If &langle;<i>outfile</i>&thinsp;&rangle; is not specified,
+  the output is directed to the value of <code>(current-output-port)</code>. This procedure can be configured with
   keyword arguments and parameters in the same manner as the <code>pprint</code> procedure.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;An implementation may preserve some original whitespace and comments from the 
-  input file, but is not required to do so. If it does not preserve top-level comments or whitespace, 
+  &nbsp;&nbsp;&nbsp;&nbsp;An implementation may preserve some original whitespace and comments from the
+  input file, but is not required to do so. If it does not preserve top-level comments or whitespace,
   it should separate top-level expressions with a single empty line.
 </p>
-  
+
 <p>
   <code><b>pp-radix</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
@@ -441,47 +441,47 @@ changes in behavior depend only on the parameter values, not on the method by wh
   to print exact numbers in the specified radix. For non-decimal radices, the corresponding <code>#b</code>,
   <code>#o</code>, or <code>#x</code> prefix is automatically prepended to ensure the output is machine-readable.
   The effect of a non-decimal radix on inexact numbers, as well as the effect of radixes other than those
-  explicitly listed, must be such that reading the printed number back in the same implementation produces 
-  an <code>eqv?</code> numerical value. (A relaxed rule applies to NaNs: if the number being printed is a NaN, 
+  explicitly listed, must be such that reading the printed number back in the same implementation produces
+  an <code>eqv?</code> numerical value. (A relaxed rule applies to NaNs: if the number being printed is a NaN,
   it may be read back as a NaN with a different payload).<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;An implementation may support non-numerical values for <code>pp-radix</code>
-  to facilitate, among other things, preservation of the original lexical representation of numbers from 
-  a source file, or to allow elements of a bytevector to be printed in hexadecimal while other numbers 
+  to facilitate, among other things, preservation of the original lexical representation of numbers from
+  a source file, or to allow elements of a bytevector to be printed in hexadecimal while other numbers
   are printed in decimal. The default is an implementation-specific value that makes <code>pp</code>
-  follow conventions of the implementation’s <code>write</code> procedure. 
+  follow conventions of the implementation’s <code>write</code> procedure.
 </p>
 
 <p>
   <code><b>pp-level</b></code> &nbsp;&nbsp;<i>parameter</i><br/>
   <code><b>pp-length</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
-  The <code>pp-level</code> parameter limits how deeply the printer descends into nested structures. 
-  Its value must be either <code>#f</code> (the default, meaning no limit) or an exact nonnegative integer. 
-  The object passed to the printer is at level 0; if it is a list or vector, its elements are at level 1, 
-  their sub-elements at level 2, and so on. When the printer encounters a component at a level equal to or 
-  exceeding this bound, it prints a ‘stub’ instead of recursing further. This restriction applies only to objects 
+  The <code>pp-level</code> parameter limits how deeply the printer descends into nested structures.
+  Its value must be either <code>#f</code> (the default, meaning no limit) or an exact nonnegative integer.
+  The object passed to the printer is at level 0; if it is a list or vector, its elements are at level 1,
+  their sub-elements at level 2, and so on. When the printer encounters a component at a level equal to or
+  exceeding this bound, it prints a ‘stub’ instead of recursing further. This restriction applies only to objects
   with list-like syntax; atomic values such as booleans, symbols, strings, and numbers are unaffected.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;The <code>pp-length</code> parameter limits how many elements are shown inside any one 
-  list, vector, or other list-like object. Its value must also be either <code>#f</code> (the default, meaning no 
-  limit) or an exact non-negative integer. If an object contains more elements than permitted, the printer writes 
-  the leading elements followed by a stub representing the remainder. For dotted lists, if the sequence contains exactly 
+  &nbsp;&nbsp;&nbsp;&nbsp;The <code>pp-length</code> parameter limits how many elements are shown inside any one
+  list, vector, or other list-like object. Its value must also be either <code>#f</code> (the default, meaning no
+  limit) or an exact non-negative integer. If an object contains more elements than permitted, the printer writes
+  the leading elements followed by a stub representing the remainder. For dotted lists, if the sequence contains exactly
   as many elements as the limit, the terminating atom is printed instead of a stub.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;The appearance of these stubs is implementation-dependent. Some printers, following 
-  Common Lisp tradition, use <code>#</code> for level-limit stubs, while others may use ‘shells’ of objects 
-  with their contents replaced by an ellipsis (<code>...</code>). The length-limit stub may also vary but is 
-  usually an ellipsis (<code>...</code>). The <code>(srfi 272 intermediate)</code> library offers no control 
+  &nbsp;&nbsp;&nbsp;&nbsp;The appearance of these stubs is implementation-dependent. Some printers, following
+  Common Lisp tradition, use <code>#</code> for level-limit stubs, while others may use ‘shells’ of objects
+  with their contents replaced by an ellipsis (<code>...</code>). The length-limit stub may also vary but is
+  usually an ellipsis (<code>...</code>). The <code>(srfi 272 intermediate)</code> library offers no control
   over the appearance of these stubs.
 </p>
 
 <p>
 <small>
   Note: Perhaps counterintuitively, most existing pretty-printers do not treat reader macros such as
-  <code>'</code><i>obj</i>, <code>`</code><i>obj</i>, etc. the same way as their unabbreviated forms. 
-  The <i>obj</i> following a reader macro prefix is often considered to be at the same nesting level 
-  as the macro form itself. The intermediate library neither requires nor forbids this behavior, nor does it 
-  provide parameters to control it. The only requirement is to treat read macros consistently 
+  <code>'</code><i>obj</i>, <code>`</code><i>obj</i>, etc. the same way as their unabbreviated forms.
+  The <i>obj</i> following a reader macro prefix is often considered to be at the same nesting level
+  as the macro form itself. The intermediate library neither requires nor forbids this behavior, nor does it
+  provide parameters to control it. The only requirement is to treat read macros consistently
   with respect to shared references and level/length limits. In particular,
-  no <code>#</code><i>N</i>&thinsp;<code>=</code> datum label should be printed if all its references are 
+  no <code>#</code><i>N</i>&thinsp;<code>=</code> datum label should be printed if all its references are
   invisible due to presentation limits, and no <code>#</code><i>N</i>&thinsp;<code>#</code> reference should
   be printed without its corresponding definition label being visible. This rule should apply to all
   compound objects, not only to the ones printed as reader macros.
@@ -494,21 +494,21 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>pretty-style</b></code> &langle;<i>symbol</i>&thinsp;&rangle; &langle;<i>style</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  When printing Scheme code, the printer may follow established conventions for code presentation, 
-  as found in tools like Emacs. Many special forms are formatted in idiosyncratic ways dictated by 
-  their semantics, where different subforms play different roles. This procedure provides control 
+  When printing Scheme code, the printer may follow established conventions for code presentation,
+  as found in tools like Emacs. Many special forms are formatted in idiosyncratic ways dictated by
+  their semantics, where different subforms play different roles. This procedure provides control
   over the styling by allowing a user to associate a custom style with a form’s leading symbol
-  by copying a style associated with an existing symbol.<br/> 
-  &nbsp;&nbsp;&nbsp;&nbsp;If called with a single argument, this procedure returns the style object associated 
-  with that symbol, or <code>#f</code> if no style is associated. A style is an opaque object, 
+  by copying a style associated with an existing symbol.<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;If called with a single argument, this procedure returns the style object associated
+  with that symbol, or <code>#f</code> if no style is associated. A style is an opaque object,
   distinct from <code>#f</code>.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;If called with two arguments, the procedure associates the given style (which may
   be either a style object returned from a one-argument call or <code>#f</code>) with the given symbol. Providing
-  <code>#f</code> as the style value resets the formatting for forms starting with that symbol to an 
+  <code>#f</code> as the style value resets the formatting for forms starting with that symbol to an
   implementation-specific default&mdash;the same default that is used for printing unknown forms.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;Although implementations are not required to implement custom styling control
   via this mechanism (they can always return <code>#f</code>), they are encouraged to do so. If they do so,
-  they must ensure that their style objects are reusable and do not depend on the length of the symbols 
+  they must ensure that their style objects are reusable and do not depend on the length of the symbols
   with which they are associated.
 </p>
 
@@ -516,27 +516,27 @@ changes in behavior depend only on the parameter values, not on the method by wh
 
 <p>
   This optional library provides all the functionality of the <code>(srfi 272 intermediate)</code> library,
-  adding the procedures and parameters described below. The functionality provided is a union of features 
-  commonly found in intermediate to advanced pretty-printers, and in many cases, implementation-specific 
+  adding the procedures and parameters described below. The functionality provided is a union of features
+  commonly found in intermediate to advanced pretty-printers, and in many cases, implementation-specific
   libraries can be mapped directly to this one.
 </p>
 
 <p>
   The <code>pp</code>, <code>pp*</code>, <code>pprint</code>, <code>pprint-shared</code>, and
-  <code>pprint-simple</code> procedures maintain the same requirements and guarantees as specified 
+  <code>pprint-simple</code> procedures maintain the same requirements and guarantees as specified
   for the intermediate library, except where modified by the functionality described below.
 </p>
 
 <p>
-  The <code>pprint-file</code> procedure is enhanced in this library: it is required to pass 
-  line comments and whitespace between top-level forms from the input to the output verbatim, 
+  The <code>pprint-file</code> procedure is enhanced in this library: it is required to pass
+  line comments and whitespace between top-level forms from the input to the output verbatim,
   unless the <code>pp-decorate</code> parameter is set to <code>#f</code> (see detailed
   description below).
 </p>
 
 <p>
   The storage behind the <code>pretty-style</code> procedure is made explicit; the style objects
-  are no longer opaque. The details follow the description of the <code>pp-styles</code> parameter 
+  are no longer opaque. The details follow the description of the <code>pp-styles</code> parameter
   below.
 </p>
 
@@ -549,8 +549,8 @@ changes in behavior depend only on the parameter values, not on the method by wh
 <p>
   <code><b>pp-lines</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
-  This parameter limits the total number of lines printed. Its value must be either <code>#f</code> 
-  (the default, meaning no limit) or an exact non-negative integer. If the limit is reached, printing 
+  This parameter limits the total number of lines printed. Its value must be either <code>#f</code>
+  (the default, meaning no limit) or an exact non-negative integer. If the limit is reached, printing
   is terminated with a lines stub.
 </p>
 
@@ -559,25 +559,25 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code><b>pp-length-stub</b></code> &nbsp;&nbsp;<i>parameter</i><br/>
   <code><b>pp-lines-stub</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
-  These parameters provide explicit control over the appearance of the stubs printed when 
+  These parameters provide explicit control over the appearance of the stubs printed when
   output is truncated due to the <code>pp-level</code>, <code>pp-length</code>, and
   <code>pp-lines</code> limits, respectively. All three parameters accept string values (e.g.
-  <code>"#"</code> for level, <code>"..."</code> for length, and <code>".."</code> for 
+  <code>"#"</code> for level, <code>"..."</code> for length, and <code>".."</code> for
   lines to achieve a Common Lisp-like appearance). The <code>pp-level-stub</code>
-  can also accept <code>#t</code>, which instructs the pretty-printer to use ‘shell’ 
-  representations of compound objects for the level stubs. For a level stub, the 
+  can also accept <code>#t</code>, which instructs the pretty-printer to use ‘shell’
+  representations of compound objects for the level stubs. For a level stub, the
   object’s contents are replaced by the <code>pp-length-stub</code> string, as if the
   objects are printed with <code>pp-length</code> set to <code>0</code>. If the
   <code>pp-lines-stub</code> parameter is set to <code>#f</code>, the <code>pp-length-stub</code>
-  string is used instead. Following Common Lisp convention, all outstanding closing parentheses 
+  string is used instead. Following Common Lisp convention, all outstanding closing parentheses
   must be printed immediately after a line stub, before the terminating newline (if any).
 </p>
 
 <p>
   <code><b>pp-newline</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
-  If set to <code>#f</code>, this parameter suppresses the final newline 
-  that is normally printed at the end of the output. The default value 
+  If set to <code>#f</code>, this parameter suppresses the final newline
+  that is normally printed at the end of the output. The default value
   is <code>#t</code>.
 </p>
 
@@ -586,15 +586,15 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code><b>pp-miser-width</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
   These parameters accept <code>#f</code> or an exact nonnegative integer.
-  If <code>pp-inline-width</code> is an integer, it acts as a soft limit 
-  on the width of complete subexpressions that would otherwise be printed 
-  on a single line. This can be set to a value less than <code>pp-width</code> 
-  to produce more natural-looking layouts. If it is set to <code>#f</code>, 
+  If <code>pp-inline-width</code> is an integer, it acts as a soft limit
+  on the width of complete subexpressions that would otherwise be printed
+  on a single line. This can be set to a value less than <code>pp-width</code>
+  to produce more natural-looking layouts. If it is set to <code>#f</code>,
   single-line expressions receive no special treatment.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;If <code>pp-miser-width</code> is an integer, 
-  it specifies a ‘miser mode’ zone near the right margin. Expressions printed 
+  &nbsp;&nbsp;&nbsp;&nbsp;If <code>pp-miser-width</code> is an integer,
+  it specifies a ‘miser mode’ zone near the right margin. Expressions printed
   within this zone are formatted with minimal indentation to save horizontal space.
-  If it is set to <code>#f</code>, expressions near the right margin receive 
+  If it is set to <code>#f</code>, expressions near the right margin receive
   no special treatment.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;The default values for both parameters are implementation-dependent.
 </p>
@@ -602,11 +602,11 @@ changes in behavior depend only on the parameter values, not on the method by wh
 <p>
   <code><b>pp-indent</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
-  If set to an exact non-negative integer, this parameter informs the printer 
-  that the output starts at the specified column. This is useful when embedding pretty-printed 
-  text within a line that already contains content. All subsequent lines of the pretty-printed 
-  output will be left-padded with spaces to ensure correct alignment relative to this initial 
-  indentation. Implementations that track port columns may support non-numeric values for this 
+  If set to an exact non-negative integer, this parameter informs the printer
+  that the output starts at the specified column. This is useful when embedding pretty-printed
+  text within a line that already contains content. All subsequent lines of the pretty-printed
+  output will be left-padded with spaces to ensure correct alignment relative to this initial
+  indentation. Implementations that track port columns may support non-numeric values for this
   parameter. The default value is either <code>0</code> or an implementation-dependent
   value that instructs the printer to use the current port column.
 </p>
@@ -616,18 +616,18 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code><b>pp-max-tab</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
   These parameters, which accept exact non-negative integers, control indentation.
-  The <code>pp-tab</code> parameter specifies the number of columns by which the printer 
-  indents the bodies of most forms (such as <code>let</code> expressions), relative to the start of 
-  the form’s keyword. Note that since an opening parenthesis adds one column of indentation, 
-  the total indent from the parenthesis will be <code>(pp-tab) + 1</code>. 
+  The <code>pp-tab</code> parameter specifies the number of columns by which the printer
+  indents the bodies of most forms (such as <code>let</code> expressions), relative to the start of
+  the form’s keyword. Note that since an opening parenthesis adds one column of indentation,
+  the total indent from the parenthesis will be <code>(pp-tab) + 1</code>.
   A value of <code>0</code> aligns the body with the keyword.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;When formatting code, short keywords like <code>if</code>
-  may trigger a special layout where the first subexpression after the keyword appears 
+  may trigger a special layout where the first subexpression after the keyword appears
   on the same line as the keyword, with subsequent subexpressions aligned under it.
-  This can lead to offsets greater than what <code>pp-tab</code> would dictate. 
-  The <code>pp-max-tab</code> parameter puts an upper limit on these special offsets, 
-  preventing long keywords from causing excessive rightward shifts. As before, offsets 
-  are counted from the start column of the form’s keyword or first expression, not from 
+  This can lead to offsets greater than what <code>pp-tab</code> would dictate.
+  The <code>pp-max-tab</code> parameter puts an upper limit on these special offsets,
+  preventing long keywords from causing excessive rightward shifts. As before, offsets
+  are counted from the start column of the form’s keyword or first expression, not from
   its opening parenthesis/bracket.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;The default values for both parameters are implementation-dependent.
 </p>
@@ -637,14 +637,14 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code><b>pp-brackets</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
   These boolean parameters provide <i>hints</i>&thinsp; to trigger specialized code-formatting behavior.
-  If <code>pp-code</code> is true, it signals that the input is an S-expression representing Scheme code, 
-  allowing the printer to apply conventional code layout rules. Otherwise, no such special 
-  formatting is assumed. Conforming implementations are encouraged, but not required, to act on this hint. 
+  If <code>pp-code</code> is true, it signals that the input is an S-expression representing Scheme code,
+  allowing the printer to apply conventional code layout rules. Otherwise, no such special
+  formatting is assumed. Conforming implementations are encouraged, but not required, to act on this hint.
   The default value is implementation-dependent.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;If <code>pp-brackets</code> is true, it hints that R6RS-style square 
-  brackets <code>[]</code> should be selectively used as an alternative to parentheses when printing in 
-  code mode. Implementations not supporting this feature in the reader are free to ignore the hint. 
-  To ensure portability, a value of <code>#f</code> should disable bracket printing on 
+  &nbsp;&nbsp;&nbsp;&nbsp;If <code>pp-brackets</code> is true, it hints that R6RS-style square
+  brackets <code>[]</code> should be selectively used as an alternative to parentheses when printing in
+  code mode. Implementations not supporting this feature in the reader are free to ignore the hint.
+  To ensure portability, a value of <code>#f</code> should disable bracket printing on
   all implementations. The default is implementation-dependent.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;Note: See R6RS Appendix C for guidelines on the use of square brackets.
 </p>
@@ -653,20 +653,20 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code><b>pp-pretty</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
   This boolean parameter is true by default. If set to <code>#f</code>,
-  all runs of continuous whitespace normally introduced by the pretty-printer are collapsed 
-  into single spaces, producing a style similar to that of <code>write</code>. 
-  Other pretty printing parameters not related to whitespace remain in effect. 
+  all runs of continuous whitespace normally introduced by the pretty-printer are collapsed
+  into single spaces, producing a style similar to that of <code>write</code>.
+  Other pretty printing parameters not related to whitespace remain in effect.
   The terminating newline is also omitted, regardless of the <code>pp-newline</code> setting.
 </p>
 
 <p>
   <code><b>pp-color</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
-  
-  If the implementation supports color-capable ports (e.g., ports connected to 
-  ANSI X3.64 / ISO/IEC 6429 compatible terminals), this parameter can be used to request 
-  that the printer use syntax highlighting when printing Scheme code 
-  (see <code>pp-code</code> for discussion on code vs. data printing). If set to <code>#t</code>, 
-  some built-in implementation-dependent color theme will be used. 
+
+  If the implementation supports color-capable ports (e.g., ports connected to
+  ANSI X3.64 / ISO/IEC 6429 compatible terminals), this parameter can be used to request
+  that the printer use syntax highlighting when printing Scheme code
+  (see <code>pp-code</code> for discussion on code vs. data printing). If set to <code>#t</code>,
+  some built-in implementation-dependent color theme will be used.
   For more control over colors, see the description of the <code>(srfi 272 colorize)</code>
   library below. The default value of this parameter is <code>#f</code> (do not use color).<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;Implementations are encouraged to assess local color capabilities
@@ -674,9 +674,9 @@ changes in behavior depend only on the parameter values, not on the method by wh
   variables. If an implementation cannot detect any color support, it should not by default
   attempt to use color and just print without it (but see the colorize library for ways
   to control this behavior).<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;Note that it can be useful to emit color sequences to ports 
-  not connected to a terminal. One might want to aggregate output in string or file ports 
-  to be later sent to a color-capable port, so implementations should not make decisions 
+  &nbsp;&nbsp;&nbsp;&nbsp;Note that it can be useful to emit color sequences to ports
+  not connected to a terminal. One might want to aggregate output in string or file ports
+  to be later sent to a color-capable port, so implementations should not make decisions
   based solely on capabilities of the port passed to the pretty-printer as an argument.
 </p>
 
@@ -685,12 +685,12 @@ changes in behavior depend only on the parameter values, not on the method by wh
 
   If set to <code>#f</code>, this parameter commands <code>pprint-file</code> to
   ignore all comments in the input file, and to separate printed top-level expressions
-  with a single empty line. If set to <code>#t</code> (the default), <code>pprint-file</code> 
+  with a single empty line. If set to <code>#t</code> (the default), <code>pprint-file</code>
   must preserve line comments and whitespace between top-level expressions, passing it to
-  the output verbatim. There is no requirement to preserve block or S-expression comments, 
+  the output verbatim. There is no requirement to preserve block or S-expression comments,
   but implementations are free to do so.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;Implementations are free to support non-boolean values 
-  for this parameter to facilitate more faithful reproduction of some aspects of the 
+  &nbsp;&nbsp;&nbsp;&nbsp;Implementations are free to support non-boolean values
+  for this parameter to facilitate more faithful reproduction of some aspects of the
   original source code.
 </p>
 
@@ -699,9 +699,9 @@ changes in behavior depend only on the parameter values, not on the method by wh
 
   The value of this parameter must be a procedure accepting two arguments: a string and
   a port. This procedure is used for all conventional output of the pretty printer, which
-  is all output except the special character sequences added by the colorizer; in most cases, 
+  is all output except the special character sequences added by the colorizer; in most cases,
   all output is conventional. The default value of the parameter is the standard <code>write-string</code>
-  procedure, but a user can substitute a different procedure to perform custom post-processing 
+  procedure, but a user can substitute a different procedure to perform custom post-processing
   of the output, such as adding line numbers.
 </p>
 
@@ -712,7 +712,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
   a port. This procedure is used for all unconventional output of the pretty printer, which
   is limited to special character sequences added by the colorizer.
   The default value of the parameter is the standard <code>write-string</code>
-  procedure, but a user can substitute a different procedure to perform custom post-processing 
+  procedure, but a user can substitute a different procedure to perform custom post-processing
   of the output, such as filtering out the coloring.
 </p>
 
@@ -720,8 +720,8 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code><b>pp-styles</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
   This parameter holds the internal style registry, which is managed by <code>pretty-style</code>,
-  making it explicit and directly accessible. It holds an opaque style registry object that can be 
-  manipulated functionally via <code>add-pp-style</code>. This allows for side-effect-free manipulation and 
+  making it explicit and directly accessible. It holds an opaque style registry object that can be
+  manipulated functionally via <code>add-pp-style</code>. This allows for side-effect-free manipulation and
   enables capturing a snapshot of the registry for later use.
 </p>
 
@@ -729,9 +729,9 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>add-pp-style</b></code> &langle;<i>style registry</i>&thinsp;&rangle; &langle;<i>symbol</i>&thinsp;&rangle; &langle;<i>style</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  This procedure functionally updates a style registry object. It returns a new registry object reflecting the change, 
-  leaving the original arguments unmodified. If the style argument is <code>#f</code>, it returns a registry where 
-  the symbol has no associated style. Otherwise, style must be a valid style object, and the returned registry 
+  This procedure functionally updates a style registry object. It returns a new registry object reflecting the change,
+  leaving the original arguments unmodified. If the style argument is <code>#f</code>, it returns a registry where
+  the symbol has no associated style. Otherwise, style must be a valid style object, and the returned registry
   will contain this new association, replacing any previous one for the given symbol.
 </p>
 
@@ -739,33 +739,33 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>lookup-pp-style</b></code> &langle;<i>style registry</i>&thinsp;&rangle; &langle;<i>symbol</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  This procedure returns the style object associated with the given symbol in the style registry object, 
+  This procedure returns the style object associated with the given symbol in the style registry object,
   or <code>#f</code> if no association exists.
 </p>
 
 <p>
-  This library makes the structure of a style object explicit. It is an improper list matching the 
+  This library makes the structure of a style object explicit. It is an improper list matching the
   grammar below. Although the grammar is given as a printed representation, a style is a list, not a string.
 </p>
 
 <p>
 &langle;<i>style</i>&thinsp;&rangle; &xrarr;
 &nbsp;&nbsp;<code>(</code> <code>_</code> . &langle;<i>fmt-tail</i>&thinsp;&rangle; <code>)</code><br/>
-&langle;<i>fmt-tail</i>&thinsp;&rangle; &xrarr; 
-&nbsp;&nbsp;<code>body</code> | <code>fill</code> 
-| <code>dc<small>*</small></code> | <code>ec<small>*</small></code> | <code>fc<small>*</small></code> | <code>lc<small>*</small></code> 
-| <code>(</code> <code>i?</code> . &langle;<i>fmt-tail</i>&thinsp;&rangle; <code>)</code> 
+&langle;<i>fmt-tail</i>&thinsp;&rangle; &xrarr;
+&nbsp;&nbsp;<code>body</code> | <code>fill</code>
+| <code>dc<small>*</small></code> | <code>ec<small>*</small></code> | <code>fc<small>*</small></code> | <code>lc<small>*</small></code>
+| <code>(</code> <code>i?</code> . &langle;<i>fmt-tail</i>&thinsp;&rangle; <code>)</code>
 | <code>(</code> &langle;<i>fmt</i>&thinsp;&rangle; . &langle;<i>fmt-tail</i>&thinsp;&rangle; <code>)</code><br/>
-&langle;<i>fmt</i>&thinsp;&rangle; &xrarr; 
+&langle;<i>fmt</i>&thinsp;&rangle; &xrarr;
 &nbsp;&nbsp;<code>i</code> | <code>d</code> | <code>e</code> | <code>f</code> | <code>l</code> | <code>h</code>
 | <code>dc</code> | <code>ec</code> | <code>fc</code> | <code>lc</code> | &langle;<i>fmt-tail</i>&thinsp;&rangle;
 </p>
 
 <p>
-  A style object acts as a pattern that is matched against an input form. If the form does not match the pattern, 
-  the non-matching part is printed as a plain datum. All terminals in the grammar (except <code>i?</code>) match 
-  any subform, and the printer will attempt to render that subform according to the specified method (see table below). 
-  The <code>i?</code> terminal is special: if the corresponding subform is an identifier, <code>i?</code> is treated 
+  A style object acts as a pattern that is matched against an input form. If the form does not match the pattern,
+  the non-matching part is printed as a plain datum. All terminals in the grammar (except <code>i?</code>) match
+  any subform, and the printer will attempt to render that subform according to the specified method (see table below).
+  The <code>i?</code> terminal is special: if the corresponding subform is an identifier, <code>i?</code> is treated
   as <code>i</code>; otherwise, the terminal is ignored, and matching continues with the same subform and the rest of the style pattern.
 </p>
 
@@ -814,14 +814,14 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>pretty-hook</b></code> &langle;<i>test</i>&thinsp;&rangle; &langle;<i>hook</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  This procedure provides an interface for managing global <i>hooks</i>&mdash;special handlers for types 
-  of Scheme objects that require custom printing logic (e.g., boxes or homogeneous numeric vectors). 
+  This procedure provides an interface for managing global <i>hooks</i>&mdash;special handlers for types
+  of Scheme objects that require custom printing logic (e.g., boxes or homogeneous numeric vectors).
   It maintains a hook registry, an opaque object stored in the <code>pp-hooks</code> parameter.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;If called with one argument, it returns the hook object associated with the 
-  test procedure, or <code>#f</code> if no association exists. A return value of <code>#t</code> indicates 
+  &nbsp;&nbsp;&nbsp;&nbsp;If called with one argument, it returns the hook object associated with the
+  test procedure, or <code>#f</code> if no association exists. A return value of <code>#t</code> indicates
   that test is not a simple predicate but a procedure that returns a hook object upon a successful match.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;If called with two arguments, it associates a hook object with a test procedure
-  by changing the value of the <code>pp-hooks</code> parameter. If hook is <code>#t</code>, it signifies 
+  by changing the value of the <code>pp-hooks</code> parameter. If hook is <code>#t</code>, it signifies
   that test is a procedure that returns a hook object.
 </p>
 
@@ -829,7 +829,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code><b>pp-hooks</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
   The hook registry managed by <code>pretty-hook</code> is stored in this parameter.
-  It can be manipulated functionally via <code>add-pp-hook</code>, allowing for side-effect-free 
+  It can be manipulated functionally via <code>add-pp-hook</code>, allowing for side-effect-free
   updates and snapshots of the registry state.
 </p>
 
@@ -837,11 +837,11 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>add-pp-hook</b></code> &langle;<i>hook registry</i>&thinsp;&rangle; &langle;<i>test</i>&thinsp;&rangle; &langle;<i>hook</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  This procedure functionally updates a hook registry. If hook is <code>#f</code>, it returns a new registry 
-  with no hook associated with the test procedure. If hook is a hook object, test is treated as a predicate, 
-  and the returned registry contains this new association. If hook is <code>#t</code>, test is expected to be 
+  This procedure functionally updates a hook registry. If hook is <code>#f</code>, it returns a new registry
+  with no hook associated with the test procedure. If hook is a hook object, test is treated as a predicate,
+  and the returned registry contains this new association. If hook is <code>#t</code>, test is expected to be
   a procedure that returns a hook on successful matches.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;New associations are added to the beginning of the registry’s testing order; 
+  &nbsp;&nbsp;&nbsp;&nbsp;New associations are added to the beginning of the registry’s testing order;
   existing associations for the same test are replaced in place. The original arguments are not modified.
 </p>
 
@@ -863,29 +863,29 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>rmac-pp-hook</b></code> &langle;<i>prefix</i>&thinsp;&rangle; &langle;<i>ef</i>&thinsp;&rangle; &langle;<i>xf</i>&thinsp;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  These procedures construct hook objects. A hook ‘explains’ a custom data type to the printer in terms it can understand, 
-  by providing prefix/suffix strings and functions that allow the printer to treat the object as an abstract sequence 
+  These procedures construct hook objects. A hook ‘explains’ a custom data type to the printer in terms it can understand,
+  by providing prefix/suffix strings and functions that allow the printer to treat the object as an abstract sequence
   or an atomic value.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;The <code>glst-pp-hook</code> constructor creates a hook that views an input object in
-  terms of a generalized list. It provides a prefix string (e.g., <code>"#["</code>), a <i>cf</i>&thinsp; (conversion function) to convert 
-  the object into a Scheme list, an <i>xf</i>&thinsp; (a reverse conversion function) to recreate the original object from a list, 
+  terms of a generalized list. It provides a prefix string (e.g., <code>"#["</code>), a <i>cf</i>&thinsp; (conversion function) to convert
+  the object into a Scheme list, an <i>xf</i>&thinsp; (a reverse conversion function) to recreate the original object from a list,
   and a suffix string (e.g., <code>"]"</code>).<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;The <code>bvec-pp-hook</code> constructor creates a hook that views an input object 
+  &nbsp;&nbsp;&nbsp;&nbsp;The <code>bvec-pp-hook</code> constructor creates a hook that views an input object
   in terms of a binary vector. It provides a prefix string, an <i>lf</i>&thinsp; (length function), an <i>rf</i>&thinsp; (a <code>vector-ref</code>-like reference function) returning a number, and a suffix string.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;The <code>atom-pp-hook</code> constructor creates a hook that views an input object as an 
+  &nbsp;&nbsp;&nbsp;&nbsp;The <code>atom-pp-hook</code> constructor creates a hook that views an input object as an
   indivisible ‘atom.’ It provides a boolean flag indicating if the object can be labeled with a datum label
-  when printed in <code>pp-graph</code> mode, a <i>wf</i>&thinsp; (width function) to calculate its printed length, and a 
-  <i>df</i>&thinsp; (display function) that accepts an object and a radix, returning a list of strings and color symbols 
-  for printing. This list should contain one or more strings, each string optionally preceded by a symbol identifying 
+  when printed in <code>pp-graph</code> mode, a <i>wf</i>&thinsp; (width function) to calculate its printed length, and a
+  <i>df</i>&thinsp; (display function) that accepts an object and a radix, returning a list of strings and color symbols
+  for printing. This list should contain one or more strings, each string optionally preceded by a symbol identifying
   its <i>semantic color</i>&thinsp; (more on this below).<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;The <code>rmac-pp-hook</code> constructor creates a hook that views an input object as a read
-  macro (like <code>'a</code> standing for <code>(quote a)</code>). It provides a prefix string (e.g., <code>"'"</code>), 
-  an <i>ef</i>&thinsp; (extraction function, e.g., <code>cadr</code>), and an <i>xf</i>&thinsp; (a reverse of 
+  macro (like <code>'a</code> standing for <code>(quote a)</code>). It provides a prefix string (e.g., <code>"'"</code>),
+  an <i>ef</i>&thinsp; (extraction function, e.g., <code>cadr</code>), and an <i>xf</i>&thinsp; (a reverse of
   the extraction function, e.g., <code>(lambda (x) (list 'quote x))</code>.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;The choice of which hook to use must be based on the desired printed representation, 
+  &nbsp;&nbsp;&nbsp;&nbsp;The choice of which hook to use must be based on the desired printed representation,
   not the object’s internal structure. For example, bit vectors that should be printed as <code>#*010110110</code>
-  cannot be described with <code>glist-pp-hook</code> or <code>bvec-pp-hook</code>, because those hooks 
-  assume space-separated elements. Instead, such an object must be described with <code>atom-pp-hook</code>, 
+  cannot be described with <code>glist-pp-hook</code> or <code>bvec-pp-hook</code>, because those hooks
+  assume space-separated elements. Instead, such an object must be described with <code>atom-pp-hook</code>,
   even though it is internally a sequence. The same principle applies to strings.
 </p>
 
@@ -918,25 +918,25 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </p>
 
 <p>
-  In this library, the <code>pprint-file</code> procedure is further enhanced. If the <code>pp-decorate</code> 
-  parameter is true, <code>pprint-file</code> is expected to preserve as many comments as possible, 
-  including line comments within expressions, unless they interfere with line breaking decisions 
-  made by the printer. Implementations are encouraged, but not required, to consider the location of 
+  In this library, the <code>pprint-file</code> procedure is further enhanced. If the <code>pp-decorate</code>
+  parameter is true, <code>pprint-file</code> is expected to preserve as many comments as possible,
+  including line comments within expressions, unless they interfere with line breaking decisions
+  made by the printer. Implementations are encouraged, but not required, to consider the location of
   existing internal line comments when choosing where to insert line breaks. If <code>pp-decorate</code>
-  is <code>#f</code>, <code>pprint-file</code> must ignore all comments and separate top-level 
+  is <code>#f</code>, <code>pprint-file</code> must ignore all comments and separate top-level
   expressions with a single empty line.
 </p>
 
 <p><small>
-  One way to preserve internal comments is to use a custom reader to collect their locations and pass 
-  the resulting comment map to the printer via a custom value for the <code>pp-decorate</code> parameter. 
-  The same effect can be achieved by using a reader that produces annotated abstract syntax trees (ASTs) 
+  One way to preserve internal comments is to use a custom reader to collect their locations and pass
+  the resulting comment map to the printer via a custom value for the <code>pp-decorate</code> parameter.
+  The same effect can be achieved by using a reader that produces annotated abstract syntax trees (ASTs)
   and having the printer accept this format alongside regular S-expressions.
 </small></p>
 
 <p>
   While processing the head of the input file (lines before the first S-expression), <code>pprint-file</code>
-  in decoration mode must recognize a special ‘magic comment’ that follows the Emacs convention for 
+  in decoration mode must recognize a special ‘magic comment’ that follows the Emacs convention for
   <a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html">file-local variables</a>,
   for example:
 </p>
@@ -945,9 +945,9 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </code></pre>
 
 <p>
-  It must parse the first such line it encounters and extract key-value pairs that can be interpreted 
-  as pretty-printer parameters. Recognized keys include both standard Emacs variables and <code>pp-</code> 
-  prefixed parameter names. The minimum supported set of mappings from file variable keys to parameters 
+  It must parse the first such line it encounters and extract key-value pairs that can be interpreted
+  as pretty-printer parameters. Recognized keys include both standard Emacs variables and <code>pp-</code>
+  prefixed parameter names. The minimum supported set of mappings from file variable keys to parameters
   is shown below as key-parameter pairs:
 </p>
 
@@ -964,11 +964,11 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </table>
 
 <p>
-  The values for these variables should be numbers or the special symbols <code>t</code> 
+  The values for these variables should be numbers or the special symbols <code>t</code>
   (for <code>#t</code>) and <code>nil</code> (for <code>#f</code>).
-  These values are converted to regular Scheme values and used to establish a file-scoped 
-  configuration. This configuration takes precedence over the dynamic values of the 
-  parameters but can be overridden by keyword arguments explicitly passed to 
+  These values are converted to regular Scheme values and used to establish a file-scoped
+  configuration. This configuration takes precedence over the dynamic values of the
+  parameters but can be overridden by keyword arguments explicitly passed to
   <code>pprint-file</code>.
 </p>
 
@@ -980,13 +980,13 @@ changes in behavior depend only on the parameter values, not on the method by wh
 
   This procedure reads code expressions from a text file specified by &langle;<i>infile</i>&thinsp;&rangle; (a string), and
   pretty prints the expressions it reads to a new HTML file specified by &langle;<i>outfile</i>&thinsp;&rangle; (also a string).
-  If &langle;<i>outfile</i>&thinsp;&rangle; is not specified, 
-  the output is directed to the value of <code>(current-output-port)</code>. This procedure can be configured with 
+  If &langle;<i>outfile</i>&thinsp;&rangle; is not specified,
+  the output is directed to the value of <code>(current-output-port)</code>. This procedure can be configured with
   keyword arguments and parameters in the same manner as <code>pprint-file</code>.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;The requirements for preserving whitespace and comments are the same as for this
   library’s <code>pprint-file</code>. The <code>pp-color</code> parameter is treated specially: if
-  color printing is requested, the coloring engine switches to emitting HTML <code>&lt;span&gt;</code> tags 
-  with appropriate CSS classes or inline styles instead of terminal color sequences. The color theme and text 
+  color printing is requested, the coloring engine switches to emitting HTML <code>&lt;span&gt;</code> tags
+  with appropriate CSS classes or inline styles instead of terminal color sequences. The color theme and text
   attributes are adapted for presentation in HTML.
 </p>
 
@@ -994,28 +994,28 @@ changes in behavior depend only on the parameter values, not on the method by wh
 <h3>The <code>(srfi 272 colorize)</code> library</h3>
 
 <p>
-  This optional library provides a comprehensive framework for adding color and text attributes to the 
-  pretty printer’s output, primarily for ANSI-compatible terminals. It introduces facilities for detecting 
-  terminal capabilities, generating appropriate SGR (Select Graphic Rendition) control sequences, and 
+  This optional library provides a comprehensive framework for adding color and text attributes to the
+  pretty printer’s output, primarily for ANSI-compatible terminals. It introduces facilities for detecting
+  terminal capabilities, generating appropriate SGR (Select Graphic Rendition) control sequences, and
   mapping high-level semantic categories to specific visual styles.
 </p>
 
 <p>
   This library can be imported alongside either the <code>(srfi 272 advanced)</code> or <code>(srfi 272 fancy)</code>
-  library, which accepts <i>semantic color mappers</i>, as defined by this library, as legal values of the 
+  library, which accepts <i>semantic color mappers</i>, as defined by this library, as legal values of the
   <code>pp-color</code> parameter.
 </p>
 
 <p>
-  The library employs a heuristic-based system to determine the host terminal’s color capabilities. 
-  This logic is encapsulated in the <code>detect-sgr-tier</code> procedure and exposed through the 
+  The library employs a heuristic-based system to determine the host terminal’s color capabilities.
+  This logic is encapsulated in the <code>detect-sgr-tier</code> procedure and exposed through the
   <code>sgr-support-tier</code> parameter.
 </p>
 
 <p>
   <code>(<b>detect-sgr-tier</b>)</code>&nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  Probes the environment (inspecting variables like <code>TERM</code>, <code>COLORTERM</code>, <code>NO_COLOR</code>, 
+  Probes the environment (inspecting variables like <code>TERM</code>, <code>COLORTERM</code>, <code>NO_COLOR</code>,
   and <code>CLICOLOR_FORCE</code>) to determine the terminal’s SGR support level. It returns one of the following values:
 </p>
 
@@ -1030,8 +1030,8 @@ changes in behavior depend only on the parameter values, not on the method by wh
 <p>
   <code><b>sgr-support-tier</b></code> &nbsp;&nbsp;<i>parameter</i><br class="hsp"/>
 
-  Holds the result of <code>(detect-sgr-tier)</code> by default. Users can <code>parameterize</code> 
-  this to override the detected tier for a specific context, forcing the printer to generate 
+  Holds the result of <code>(detect-sgr-tier)</code> by default. Users can <code>parameterize</code>
+  this to override the detected tier for a specific context, forcing the printer to generate
   SGR sequences for a different capability level.
 </p>
 
@@ -1046,12 +1046,12 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>sgr2</b></code> &langle;<i>fgtrue</i>&thinsp;&rangle; [&langle;<i>bold?</i>&thinsp;&rangle; &langle;<i>uline?</i>&thinsp;&rangle; &langle;<i>italic?</i>&thinsp;&rangle; &langle;<i>strike?</i>&thinsp;&rangle; &langle;<i>bgtrue</i>&thinsp;&rangle;]<code>)</code>&nbsp;&nbsp;<i>procedure</i><br/>
   <code>(<b>sgr3</b></code> &langle;<i>fgtrue</i>&thinsp;&rangle; [&langle;<i>bold?</i>&thinsp;&rangle; &langle;<i>dim?</i>&thinsp;&rangle; &langle;<i>uline</i>&thinsp;&rangle; &langle;<i>italic?</i>&thinsp;&rangle; &langle;<i>strike?</i>&thinsp;&rangle; &langle;<i>bgtrue</i>&thinsp;&rangle;]<code>)</code>&nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  These procedures construct SGR parameter strings (the part between <code>ESC[</code> and <code>m</code>) 
+  These procedures construct SGR parameter strings (the part between <code>ESC[</code> and <code>m</code>)
   for tiers 0, 1, 2, and 3, respectively. They accept color specifications (
-    <code>0..15</code> for &langle;<i>fg16</i>&thinsp;&rangle;/&langle;<i>bg16</i>&thinsp;&rangle;, 
-    <code>0..255</code> for &langle;<i>fg256</i>&thinsp;&rangle;/&langle;<i>bg256</i>&thinsp;&rangle;, 
-    <code>0x000000..0xFFFFFF</code> for &langle;<i>fgtrue</i>&thinsp;&rangle;/&langle;<i>bgtrue</i>&thinsp;&rangle; #RRGGBB colors) and boolean flags for attributes 
-  like bold and underline. The <code>sgr3</code> procedure accepts an advanced &langle;<i>uline</i>&thinsp;&rangle; 
+    <code>0..15</code> for &langle;<i>fg16</i>&thinsp;&rangle;/&langle;<i>bg16</i>&thinsp;&rangle;,
+    <code>0..255</code> for &langle;<i>fg256</i>&thinsp;&rangle;/&langle;<i>bg256</i>&thinsp;&rangle;,
+    <code>0x000000..0xFFFFFF</code> for &langle;<i>fgtrue</i>&thinsp;&rangle;/&langle;<i>bgtrue</i>&thinsp;&rangle; #RRGGBB colors) and boolean flags for attributes
+  like bold and underline. The <code>sgr3</code> procedure accepts an advanced &langle;<i>uline</i>&thinsp;&rangle;
   values for styled underlines:
 </p>
 
@@ -1067,7 +1067,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </table>
 
 <p>
-  To manage styles across different terminal capabilities, this library introduces the concept of an ANSI SGR 
+  To manage styles across different terminal capabilities, this library introduces the concept of an ANSI SGR
   Bundle (ASB). An ASB is a vector of four SGR parameter strings, corresponding to tiers 0 through 3.
 </p>
 
@@ -1075,10 +1075,10 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>make-asb</b></code> &langle;<i>s0</i>&thinsp;&rangle; [&langle;<i>s1</i>&thinsp;&rangle; &langle;<i>s2</i>&thinsp;&rangle; &langle;<i>s3</i>&thinsp;&rangle;]<code>)</code>&nbsp;&nbsp;<i>procedure</i><br/>
   <code>(<b>asb-&gt;sgr-string</b></code> &langle;<i>asb</i>&thinsp;&rangle; [&langle;<i>tier</i>&thinsp;&rangle;]<code>)</code>&nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  The <code>make-asb</code> procedure constructs an ASB. If fewer than four arguments are provided, the last argument 
+  The <code>make-asb</code> procedure constructs an ASB. If fewer than four arguments are provided, the last argument
   is used to fill the remaining slots.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;The <code>asb-&gt;sgr-string</code> procedure renders an ASB into a full SGR escape sequence 
-  (e.g., <code>"\x1B[31;1m"</code>) appropriate for the given <em>tier</em> (or the current value of 
+  &nbsp;&nbsp;&nbsp;&nbsp;The <code>asb-&gt;sgr-string</code> procedure renders an ASB into a full SGR escape sequence
+  (e.g., <code>"\x1B[31;1m"</code>) appropriate for the given <em>tier</em> (or the current value of
   <code>sgr-support-tier</code>). It returns an empty string if color support is disabled.
 </p>
 
@@ -1089,11 +1089,11 @@ changes in behavior depend only on the parameter values, not on the method by wh
   &nbsp;&nbsp;<i>procedure</i><br/>
   <code><b>default-asb-palette</b></code>&nbsp;&nbsp;<i>constant</i><br class="hsp"/>
 
-  The library assembles color bundles into palettes and maps semantic categories (such as <code>comment</code> or <code>number</code>) 
+  The library assembles color bundles into palettes and maps semantic categories (such as <code>comment</code> or <code>number</code>)
   to entries in those palettes. The <code>make-asb-palette</code> procedure accepts either 8 or 16 ASBs; if the rightmost
-  8 arguments are missing, the leftmost 8 arguments are copied over. It returns an opaque palette object. 
-  The <code>asb-palette-ref</code> procedure returns the ASB stored at index &langle;<i>i</i>&thinsp;&rangle; 
-  (<code>0</code>&ndash;<code>15</code>). 
+  8 arguments are missing, the leftmost 8 arguments are copied over. It returns an opaque palette object.
+  The <code>asb-palette-ref</code> procedure returns the ASB stored at index &langle;<i>i</i>&thinsp;&rangle;
+  (<code>0</code>&ndash;<code>15</code>).
   A default 16-color palette, <code>default-asb-palette</code>, is provided.
 </p>
 
@@ -1101,10 +1101,10 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>semantic-color-mapper?</b></code> &langle;<i>obj</i>&thinsp;&rangle;<code>)</code>&nbsp;&nbsp;<i>procedure</i><br/>
   <code>(<b>make-semantic-color-mapper</b></code> &langle;<i>palette</i>&thinsp;&rangle; [&langle;<i>palette-mapper</i>&thinsp;&rangle;]<code>)</code>&nbsp;&nbsp;<i>procedure</i><br/>
   <code><b>default-semantic-color-mapper</b></code>&nbsp;&nbsp;<i>constant</i><br class="hsp"/>
- 
-  A semantic color mapper is a procedure that receives a semantic color symbol (e.g., <code>string</code>, <code>keyword</code>) 
+
+  A semantic color mapper is a procedure that receives a semantic color symbol (e.g., <code>string</code>, <code>keyword</code>)
   and a <i>start?</i>&thinsp; flag and returns a string to be sent to the output port verbatim.<br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;The <code>make-semantic-color-mapper</code> procedure creates such a mapper by combining a palette with a 
+  &nbsp;&nbsp;&nbsp;&nbsp;The <code>make-semantic-color-mapper</code> procedure creates such a mapper by combining a palette with a
   &langle;<i>palette-mapper</i>&thinsp;&rangle; that maps semantic symbols to palette indices (if not given, a default mapping
   is used, shown in the table below). The resulting mapper produces SGR escape sequences.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;A <code>default-semantic-color-mapper</code> is provided, which implements a reasonable default theme.
@@ -1112,7 +1112,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
 
 <p>
   The table below shows semantic color symbols, their description, and palette indices for these symbols,
-  as mapped by the default &langle;<i>palette-mapper</i>&thinsp;&rangle;. 
+  as mapped by the default &langle;<i>palette-mapper</i>&thinsp;&rangle;.
 </p>
 
 <table>
@@ -1143,7 +1143,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </p>
 
 <pre><code>(lambda (sc start?)
-  (if start? 
+  (if start?
       (string-append "&lt;span class=\"" (symbol->string sc) "\"&gt;")
       "&lt;/span&gt;"))
 </code></pre>
@@ -1152,9 +1152,9 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>semantic-color-&gt;start-string</b></code> &langle;<i>sc</i>&thinsp;&rangle; [&langle;<i>mapper</i>&thinsp;&rangle; &langle;<i>tier</i>&thinsp;&rangle;]<code>)</code>&nbsp;&nbsp;<i>procedure</i><br/>
   <code>(<b>semantic-color-&gt;end-string</b></code> &langle;<i>sc</i>&thinsp;&rangle; [&langle;<i>mapper</i>&thinsp;&rangle; &langle;<i>tier</i>&thinsp;&rangle;]<code>)</code>&nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  These are the high-level procedures used by the pretty printer’s emission layer. Given a semantic color 
-  symbol &langle;<i>sc</i>&thinsp;&rangle; (e.g., <code>comment</code>), they return the appropriate start sequence 
-  (e.g., <code>"\x1B[90m"</code>) and end sequence (<code>"\x1B[0m"</code>) for the current support 
+  These are the high-level procedures used by the pretty printer’s emission layer. Given a semantic color
+  symbol &langle;<i>sc</i>&thinsp;&rangle; (e.g., <code>comment</code>), they return the appropriate start sequence
+  (e.g., <code>"\x1B[90m"</code>) and end sequence (<code>"\x1B[0m"</code>) for the current support
   tier and color mapper. This is the primary interface for integrating colorization into the printer’s
   internal color emission routines. Note that coloring sequences are not passed to <code>pp-emit</code>, but
   sent to the output port via <code>pp-tint</code>.
@@ -1172,7 +1172,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
 
   This parameter holds a procedure that accepts a character and returns either the character
   width in columns it takes on a terminal (0, 1, or 2), or #f if this character is not printable.
-  The exact behavior of this procedure is implementation-dependent, but implementations are 
+  The exact behavior of this procedure is implementation-dependent, but implementations are
   encouraged to mimic the behavior of the <code>wcwidth</code> C procedure on their system,
   preferably by wrapping it directly.
 </p>
@@ -1222,8 +1222,8 @@ to make sure that parameters may be set globally (R7RS does not provide a method
 <h2 id="acknowledgements">Acknowledgements</h2>
 
 <p>
-  This proposal builds upon and is inspired by the work of countless contributors spanning 
-  the early Lisp era to the present day. Acknowledging each individual by name would be 
+  This proposal builds upon and is inspired by the work of countless contributors spanning
+  the early Lisp era to the present day. Acknowledging each individual by name would be
   impossible without risk of omission.
 </p>
 
