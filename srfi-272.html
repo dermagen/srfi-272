@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+SPDX-FileCopyrightText: 2026 Sergei Egorov
+SPDX-License-Identifier: MIT
+-->
   <head>
     <meta charset="utf-8">
-    <title>SRFI 999: Pretty Printing</title>
+    <title>SRFI 272: Pretty Printing</title>
     <link href="/favicon.png" rel="icon" sizes="192x192" type="image/png">
     <link rel="stylesheet" href="https://srfi.schemers.org/srfi.css" type="text/css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +20,7 @@
   </head>
   <body>
     <h1><a href="https://srfi.schemers.org/"><img class="srfi-logo" src="https://srfi.schemers.org/srfi-logo.svg" 
-    alt="SRFI surfboard logo" /></a>999: Pretty Printing</h1>
+    alt="SRFI surfboard logo" /></a>272: Pretty Printing</h1>
 
 <p>by Sergei Egorov</p>
 
@@ -142,10 +146,10 @@ The editor will add this section.</p>
 </p>
 
 <p>
-  In this SRFI we propose a bare-bones <code>(srfi 999)</code> pretty printing library, accompanied
-  by optional libraries of increasing functionality: <code>(srfi 999 basic)</code>, 
-  <code>(srfi 999 intermediate)</code>, <code>(srfi 999 advanced)</code>, and 
-  <code>(srfi 999 fancy)</code>. 
+  In this SRFI we propose a bare-bones <code>(srfi 272)</code> pretty printing library, accompanied
+  by optional libraries of increasing functionality: <code>(srfi 272 basic)</code>, 
+  <code>(srfi 272 intermediate)</code>, <code>(srfi 272 advanced)</code>, and 
+  <code>(srfi 272 fancy)</code>. 
 
   This layered design directly addresses the tension between these approaches by allowing flexible 
   implementation strategies that suit different needs and constraints. For example, the first 
@@ -211,10 +215,10 @@ The editor will add this section.</p>
 
 <p>
 While naming the libraries, we follow R7RS conventions; for R6RS systems, the numerical name segment should
-be prefixed with a colon, e.g. <code>(srfi :999 basic)</code>.
+be prefixed with a colon, e.g. <code>(srfi :272 basic)</code>.
 </p>
 
-<h3>The <code>(srfi 999)</code> library</h3>
+<h3>The <code>(srfi 272)</code> library</h3>
 
 <p>
   This library provides a minimalist view on pretty printing functionality.
@@ -249,10 +253,10 @@ be prefixed with a colon, e.g. <code>(srfi :999 basic)</code>.
   the last line of the &langle;<i>obj</i>&thinsp;&rangle; representation. 
 </p>
 
-<h3>The <code>(srfi 999 basic)</code> library</h3>
+<h3>The <code>(srfi 272 basic)</code> library</h3>
 
 <p>
-This optional library provides all the functionality of the <code>(srfi 999)</code> library,
+This optional library provides all the functionality of the <code>(srfi 272)</code> library,
 adding the procedures and parameters described below. 
 
 The <code>pp</code> procedure maintains the same requirements and guarantees as described above 
@@ -333,10 +337,10 @@ For these matters, it behaves as specified in the parameter descriptions below.
 </p>
 
 
-<h3>The <code>(srfi 999 intermediate)</code> library</h3>
+<h3>The <code>(srfi 272 intermediate)</code> library</h3>
 
 <p>
-This optional library provides all the functionality of the <code>(srfi 999 basic)</code> library,
+This optional library provides all the functionality of the <code>(srfi 272 basic)</code> library,
 adding the arguments and parameters described below. The set of available functionality is an
 intersection of what is usually included in intermediate pretty-printers and, in many cases, can be
 mapped directly to existing implementation-specific libraries.
@@ -465,7 +469,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
   &nbsp;&nbsp;&nbsp;&nbsp;The appearance of these stubs is implementation-dependent. Some printers, following 
   Common Lisp tradition, use <code>#</code> for level-limit stubs, while others may use ‘shells’ of objects 
   with their contents replaced by an ellipsis (<code>...</code>). The length-limit stub may also vary but is 
-  usually an ellipsis (<code>...</code>). The <code>(srfi 999 intermediate)</code> library offers no control 
+  usually an ellipsis (<code>...</code>). The <code>(srfi 272 intermediate)</code> library offers no control 
   over the appearance of these stubs.
 </p>
 
@@ -508,10 +512,10 @@ changes in behavior depend only on the parameter values, not on the method by wh
   with which they are associated.
 </p>
 
-<h3>The <code>(srfi 999 advanced)</code> library</h3>
+<h3>The <code>(srfi 272 advanced)</code> library</h3>
 
 <p>
-  This optional library provides all the functionality of the <code>(srfi 999 intermediate)</code> library,
+  This optional library provides all the functionality of the <code>(srfi 272 intermediate)</code> library,
   adding the procedures and parameters described below. The functionality provided is a union of features 
   commonly found in intermediate to advanced pretty-printers, and in many cases, implementation-specific 
   libraries can be mapped directly to this one.
@@ -663,7 +667,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
   that the printer use syntax highlighting when printing Scheme code 
   (see <code>pp-code</code> for discussion on code vs. data printing). If set to <code>#t</code>, 
   some built-in implementation-dependent color theme will be used. 
-  For more control over colors, see the description of the <code>(srfi 999 colorize)</code>
+  For more control over colors, see the description of the <code>(srfi 272 colorize)</code>
   library below. The default value of this parameter is <code>#f</code> (do not use color).<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;Implementations are encouraged to assess local color capabilities
   to make sure the colors will be displayed faithfully, e.g. by inspecting local environment
@@ -905,10 +909,10 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </p>
 
 
-<h3>The <code>(srfi 999 fancy)</code> library</h3>
+<h3>The <code>(srfi 272 fancy)</code> library</h3>
 
 <p>
-  This optional library provides all the functionality of the <code>(srfi 999 advanced)</code> library,
+  This optional library provides all the functionality of the <code>(srfi 272 advanced)</code> library,
   adding new features to the <code>pprint-file</code> procedure, and introducing a variant that
   generates HTML output.
 </p>
@@ -987,7 +991,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </p>
 
 
-<h3>The <code>(srfi 999 colorize)</code> library</h3>
+<h3>The <code>(srfi 272 colorize)</code> library</h3>
 
 <p>
   This optional library provides a comprehensive framework for adding color and text attributes to the 
@@ -997,7 +1001,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </p>
 
 <p>
-  This library can be imported alongside either the <code>(srfi 999 advanced)</code> or <code>(srfi 999 fancy)</code>
+  This library can be imported alongside either the <code>(srfi 272 advanced)</code> or <code>(srfi 272 fancy)</code>
   library, which accepts <i>semantic color mappers</i>, as defined by this library, as legal values of the 
   <code>pp-color</code> parameter.
 </p>
@@ -1156,7 +1160,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
   sent to the output port via <code>pp-tint</code>.
 </p>
 
-<h3>The <code>(srfi 999 measure)</code> library</h3>
+<h3>The <code>(srfi 272 measure)</code> library</h3>
 
 <p>
   If this library is supported, users may plug in their own versions of char width measurement
@@ -1213,7 +1217,7 @@ Sample portable R7RS implementation is available. Its only external dependency i
 to make sure that parameters may be set globally (R7RS does not provide a method of doing this).
 </p>
 
-<a href="srfi-999.tar.gz">Source for the sample implementation.</a>
+<a href="srfi-272.tar.gz">Source for the sample implementation.</a>
 
 <h2 id="acknowledgements">Acknowledgements</h2>
 
@@ -1224,7 +1228,7 @@ to make sure that parameters may be set globally (R7RS does not provide a method
 </p>
 
 <h2 id="copyright">Copyright</h2>
-<p>&copy; 202? Sergei Egorov</p>
+<p>&copy; 2026 Sergei Egorov</p>
 
 <p>
   Permission is hereby granted, free of charge, to any person
