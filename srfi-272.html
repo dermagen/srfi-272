@@ -111,7 +111,7 @@ The editor will add this section.</p>
 </p>
 
 <p>
-  More recently, <a href="https://srfi.schemers.org/srfi-166/">SRFI-166</a> introduced 
+  More recently, <a href="https://srfi.schemers.org/srfi-166/">SRFI 166</a> introduced 
   monadic formatting inspired by Haskell's printing libraries. It uses functional combinators 
   rather than special variables or dispatch tables, treats formatting as a monadic computation, 
   and can target multiple backends. While it includes pretty printing capabilities, it is 
@@ -175,11 +175,11 @@ The editor will add this section.</p>
   Furthermore, this design does not force integration with general formatting frameworks but 
   enables it where desired.
   The <code>make-pprint-generator</code> procedure in the advanced library may be used by
-  <a href="https://srfi.schemers.org/srfi-166/">SRFI-166</a> implementations to integrate
+  <a href="https://srfi.schemers.org/srfi-166/">SRFI 166</a> implementations to integrate
   the proposed advanced pretty printer into its framework. This provides a bridge between 
   the specialized and integrated worlds, allowing Scheme systems to offer a simple pretty printing API 
   for most users while permitting sophisticated composition with monadic formatters when the 
-  full power of SRFI-166 is warranted. Below is an example of how such an integration might look:
+  full power of SRFI 166 is warranted. Below is an example of how such an integration might look:
 </p>
 
 <pre><code>(define (pprinted obj . kv*)
@@ -195,7 +195,7 @@ The editor will add this section.</p>
 </code></pre>
 
 <p>
-  Integration with <a href="https://srfi.schemers.org/srfi-48/">SRFI-48</a> can be
+  Integration with <a href="https://srfi.schemers.org/srfi-48/">SRFI 48</a> can be
   achieved by substituting <code>pp</code> for <code>write</code> in the implementation
   of the <code>~Y</code> directive.
 </p>
@@ -893,7 +893,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
   <code>(<b>make-pprint-generator</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>keyword argument</i>&hellip;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
-  This procedure returns a <a href="https://srfi.schemers.org/srfi-158/">SRFI-158</a>-compatible generator, delivering
+  This procedure returns a <a href="https://srfi.schemers.org/srfi-158/">SRFI 158</a>-compatible generator, delivering
   the pretty-printed representation of &langle;<i>obj</i>&thinsp;&rangle; one line at a time. All lines but the last one
   are strings ending in a newline; whether the last string ends in a newline depends on the value of the <code>pp-newline</code>
   parameter. Keyword parameters are processed in the usual way (see <code>pprint</code> for details).<br/>
@@ -904,7 +904,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
 <p>
   <small>
   Note: the <code>make-pprint-generator</code> procedure may serve as an integration point for plugging the proposed
-  pretty printer into the <a href="https://srfi.schemers.org/srfi-166/">SRFI-166</a> framework.
+  pretty printer into the <a href="https://srfi.schemers.org/srfi-166/">SRFI 166</a> framework.
   </small>
 </p>
 
