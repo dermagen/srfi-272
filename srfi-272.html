@@ -52,6 +52,26 @@ The editor will add this section.</p>
   monadic and string-based formatting libraries is supported.
 </p>
 
+<h2 id="toc">Table of contents</h2>
+<ul>
+  <li><a href="#rationale">Rationale</a></li>
+  <li>
+    <a href="#specification">Specification</a>
+    <ul>
+      <li><a href="#the-srfi-272-library">The (srfi 272) library</a></li>
+      <li><a href="#the-srfi-272-basic-library">The (srfi 272 basic) library</a></li>
+      <li><a href="#the-srfi-272-intermediate-library">The (srfi 272 intermediate) library</a></li>
+      <li><a href="#the-srfi-272-advanced-library">The (srfi 272 advanced) library</a></li>
+      <li><a href="#the-srfi-272-fancy-library">The (srfi 272 fancy) library</a></li>
+      <li><a href="#the-srfi-272-colorize-library">The (srfi 272 colorize) library</a></li>
+      <li><a href="#the-srfi-272-measure-library">The (srfi 272 measure) library</a></li>
+    </ul>
+  </li>
+  <li><a href="#references">References</a></li>
+  <li><a href="#implementation">Implementation</a></li>
+  <li><a href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+
 <h2 id="issues">Issues</h2>
 
 <p>Currently, none.</p>
@@ -218,7 +238,7 @@ While naming the libraries, we follow R7RS conventions; for R6RS systems, the nu
 be prefixed with a colon, e.g. <code>(srfi :272 basic)</code>.
 </p>
 
-<h3>The <code>(srfi 272)</code> library</h3>
+<h3 id="the-srfi-272-library">The <code>(srfi 272)</code> library</h3>
 
 <p>
   This library provides a minimalist view on pretty printing functionality.
@@ -253,7 +273,7 @@ be prefixed with a colon, e.g. <code>(srfi :272 basic)</code>.
   the last line of the &langle;<i>obj</i>&thinsp;&rangle; representation.
 </p>
 
-<h3>The <code>(srfi 272 basic)</code> library</h3>
+<h3 id="the-srfi-272-basic-library">The <code>(srfi 272 basic)</code> library</h3>
 
 <p>
 This optional library provides all the functionality of the <code>(srfi 272)</code> library,
@@ -337,7 +357,7 @@ For these matters, it behaves as specified in the parameter descriptions below.
 </p>
 
 
-<h3>The <code>(srfi 272 intermediate)</code> library</h3>
+<h3 id="the-srfi-272-intermediate-library">The <code>(srfi 272 intermediate)</code> library</h3>
 
 <p>
 This optional library provides all the functionality of the <code>(srfi 272 basic)</code> library,
@@ -512,7 +532,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
   with which they are associated.
 </p>
 
-<h3>The <code>(srfi 272 advanced)</code> library</h3>
+<h3 id="the-srfi-272-advanced-library">The <code>(srfi 272 advanced)</code> library</h3>
 
 <p>
   This optional library provides all the functionality of the <code>(srfi 272 intermediate)</code> library,
@@ -909,7 +929,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </p>
 
 
-<h3>The <code>(srfi 272 fancy)</code> library</h3>
+<h3 id="the-srfi-272-fancy-library">The <code>(srfi 272 fancy)</code> library</h3>
 
 <p>
   This optional library provides all the functionality of the <code>(srfi 272 advanced)</code> library,
@@ -991,7 +1011,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </p>
 
 
-<h3>The <code>(srfi 272 colorize)</code> library</h3>
+<h3 id="the-srfi-272-colorize-library">The <code>(srfi 272 colorize)</code> library</h3>
 
 <p>
   This optional library provides a comprehensive framework for adding color and text attributes to the
@@ -1160,7 +1180,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
   sent to the output port via <code>pp-tint</code>.
 </p>
 
-<h3>The <code>(srfi 272 measure)</code> library</h3>
+<h3 id="the-srfi-272-measure-library">The <code>(srfi 272 measure)</code> library</h3>
 
 <p>
   If this library is supported, users may plug in their own versions of char width measurement
