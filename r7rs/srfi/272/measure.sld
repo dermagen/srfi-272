@@ -1,3 +1,7 @@
+; SPDX-FileCopyrightText: 2026 Sergei Egorov
+;
+; SPDX-License-Identifier: MIT
+
 ; Char-width library: scheme analog of wcwidth()
 ; returns #f, 0, 1, 2
 

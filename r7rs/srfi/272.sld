@@ -1,3 +1,7 @@
+; SPDX-FileCopyrightText: 2026 Sergei Egorov
+;
+; SPDX-License-Identifier: MIT
+
 ; Bare-bones Pretty Printing library
 
 (define-library (srfi 272)

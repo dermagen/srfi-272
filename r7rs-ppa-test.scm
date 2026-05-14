@@ -1,3 +1,7 @@
+; SPDX-FileCopyrightText: 2026 Sergei Egorov
+;
+; SPDX-License-Identifier: MIT
+
 ;; -*- mode: scheme; fill-column: 90; pp-inline-width: 70; pp-max-tab: 5; pp-brackets: t -*-
 
 (import (scheme base) (scheme write))
