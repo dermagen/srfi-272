@@ -162,7 +162,7 @@ The editor will add this section.</p>
 </p>
 
 <p>
-  The proposal is intended to cover a wide range of pretty printing workflows. The bare-bones
+  The proposal is intended to cover a wide range of pretty-printing workflows. The bare-bones
   and basic libraries serve the common case of quickly inspecting data structures or formatting
   code with a simple API. The intermediate and advanced layers add richer control over presentation,
   including custom rendering styles for various Scheme constructs. At the highest level, the fancy
@@ -172,7 +172,7 @@ The editor will add this section.</p>
 </p>
 
 <p>
-  Furthermore, this design does not force integration with general formatting frameworks but
+  Furthermore, this design does not force integration with general formatting frameworks, but
   enables it where desired.
   The <code>make-pprint-generator</code> procedure in the advanced library may be used by
   <a href="https://srfi.schemers.org/srfi-166/">SRFI 166</a> implementations to integrate
@@ -873,7 +873,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
   &nbsp;&nbsp;&nbsp;&nbsp;The <code>bvec-pp-hook</code> constructor creates a hook that views an input object
   in terms of a binary vector. It provides a prefix string, an <i>lf</i>&thinsp; (length function), an <i>rf</i>&thinsp; (a <code>vector-ref</code>-like reference function) returning a number, and a suffix string.<br/>
   &nbsp;&nbsp;&nbsp;&nbsp;The <code>atom-pp-hook</code> constructor creates a hook that views an input object as an
-  indivisible ‘atom.’ It provides a boolean flag indicating if the object can be labeled with a datum label
+  indivisible ‘atom.’ It provides a boolean flag indicating whether the object can be labeled with a datum label
   when printed in <code>pp-graph</code> mode, a <i>wf</i>&thinsp; (width function) to calculate its printed length, and a
   <i>df</i>&thinsp; (display function) that accepts an object and a radix, returning a list of strings and color symbols
   for printing. This list should contain one or more strings, each string optionally preceded by a symbol identifying
@@ -979,7 +979,7 @@ changes in behavior depend only on the parameter values, not on the method by wh
   &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
 
   This procedure reads code expressions from a text file specified by &langle;<i>infile</i>&thinsp;&rangle; (a string), and
-  pretty prints the expressions it reads to a new HTML file specified by &langle;<i>outfile</i>&thinsp;&rangle; (also a string).
+  pretty-prints the expressions it reads to a new HTML file specified by &langle;<i>outfile</i>&thinsp;&rangle; (also a string).
   If &langle;<i>outfile</i>&thinsp;&rangle; is not specified,
   the output is directed to the value of <code>(current-output-port)</code>. This procedure can be configured with
   keyword arguments and parameters in the same manner as <code>pprint-file</code>.<br/>
