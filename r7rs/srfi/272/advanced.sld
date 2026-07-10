@@ -23,7 +23,8 @@
     (skint
      (import
        (only (skint) box? box unbox numvector? numvector-length
-             numvector-ref))))
+             numvector-ref)))
+    (else))
   
   
   ; procedures
@@ -1004,7 +1005,8 @@
                         (emit " ")
                         (print*/fill (cdr x) (ind+ ind (+ 1 oplen)) (step v) 0
                           print-exp))
-                      (print*/fill x ind v (std-indent ind) print-exp)))
+                      (print*/fill x ind v (std-indent ind)
+                        (if kw? print-keyword print-exp) print-exp)))
                 (print*/fill x ind v (std-indent ind) print-exp)))
           (emit-rpar)))
       
@@ -1410,7 +1412,8 @@
          (lambda (x) (pretty-style (car x) (cons '_ (cdr x))))
          '((syntax-case e d . ec*)
            (with-syntax ec* . body)
-           (identifier-syntax . ec*)))))
+           (identifier-syntax . ec*))))
+      (else))
     
     ; conditionally initialize pp hook registry
     
@@ -1436,6 +1439,7 @@
                ((11)
                 (bvec-pp-hook "#f64(" numvector-length numvector-ref ")"))
                ; todo: add 2 to numvector-length for #*0101... bitvec notation
-               (else (atom-pp-hook #t written-width (lambda (x radix) x)))))))))))
+               (else (atom-pp-hook #t written-width (lambda (x radix) x))))))))
+      (else))))
 
 

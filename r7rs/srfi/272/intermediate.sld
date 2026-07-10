@@ -18,7 +18,8 @@
     (skint
      (import
        (only (skint) box? box unbox numvector? numvector-length
-             numvector-ref))))
+             numvector-ref)))
+    (else))
   
   ; procedures
   (export pp pp* pprint pprint-shared pprint-simple pprint-file)
@@ -937,7 +938,8 @@
        (for-each (lambda (x) (pretty-style (car x) (cdr x)))
          '((syntax-case _ e d . ec*)
            (with-syntax _ ec* . body)
-           (identifier-syntax _ . ec*)))))
+           (identifier-syntax _ . ec*))))
+      (else))
     
     ; conditionally initialize pp hook registry
     
@@ -963,6 +965,7 @@
                ((11)
                 (bvec-pp-hook "#f64(" numvector-length numvector-ref ")"))
                ; TODO: add 2 to numvector-length for #*0101... bitvec notation
-               (else (atom-pp-hook #t written-width write))))))))))
+               (else (atom-pp-hook #t written-width write)))))))
+      (else))))
 
 
