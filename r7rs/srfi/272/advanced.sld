@@ -5,8 +5,7 @@
 ; Advanced Pretty Printing library
 
 (define-library (srfi 272 advanced)
-  (import 
-    (scheme base) (scheme inexact) (scheme char) (scheme cxr)
+  (import (scheme base) (scheme char) (scheme cxr)
     (scheme case-lambda) (scheme inexact) (scheme file)
     (scheme read) (scheme write))
   

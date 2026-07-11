@@ -16,6 +16,12 @@
   ; color support
   (import (srfi 272 colorize))
   
+  ; extra imports depending on library availability
+  ; TODO: add num vector srfis here
+  (cond-expand
+    (skint (import (only (skint) box? box unbox)))
+    (else))
+  
   ; procedures
   (export pp pp* pprint pprint-shared pprint-simple pprint-file
     make-pprint-generator pprint-file/html)
@@ -220,7 +226,8 @@
                             (if (and (eq? (read-char p) #\8) (eq? (read-char p) lpar))
                                 (list->bytevector (sub-read-list p close-paren #f))
                                 (r-error p "invalid bytevector syntax")))
-                           ((char=? c #\&) (read-char p) 
+                           ((char=? c #\&)
+                            (read-char p)
                             (cond-expand
                               (skint (box (sub-read-carefully p)))
                               (else (r-error p "unexpected box syntax"))))

@@ -5,11 +5,11 @@
 ; Basic Pretty Printing library
 
 (define-library (srfi 272 basic)
-  (import (scheme base) (scheme inexact) (scheme cxr) (scheme write)
-    (scheme case-lambda))
+  (import (scheme base) (scheme inexact) (scheme cxr)
+    (scheme write) (scheme case-lambda))
   
   ; extra imports depending on library availability
-  (cond-expand 
+  (cond-expand
     (skint (import (only (skint) box? box unbox)))
     (else))
   
