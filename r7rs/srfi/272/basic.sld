@@ -5,7 +5,7 @@
 ; Basic Pretty Printing library
 
 (define-library (srfi 272 basic)
-  (import (scheme base) (scheme cxr) (scheme write)
+  (import (scheme base) (scheme inexact) (scheme cxr) (scheme write)
     (scheme case-lambda))
   
   ; extra imports depending on library availability

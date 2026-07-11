@@ -5,7 +5,8 @@
 ; Intermediate Pretty Printing library
 
 (define-library (srfi 272 intermediate)
-  (import (scheme base) (scheme char) (scheme cxr)
+  (import 
+    (scheme base) (scheme inexact) (scheme char) (scheme cxr)
     (scheme case-lambda) (scheme inexact) (scheme file)
     (scheme read) (scheme write))
   
@@ -130,6 +131,7 @@
     
     ; in Unicode setting takes 0-wide and 2-wide chars into account
     (define (string-width s)
+      (define char-width (char-width-procedure))
       (define n (string-length s))
       (let loop ((i 0) (w 0))
         (if (= i n)
@@ -758,7 +760,7 @@
                 (else (print/fmt (car fmt*) x ind v))))
         (define (prest x ind c v)
           (if (or (not ind) (and (csub c 3) (fitsi? x c v)))
-              (begin (emit " . ") (print x #f v))
+              (begin (emit " . ") (print-datum x #f v))
               (begin
                 (space ind v)
                 (emit ".")

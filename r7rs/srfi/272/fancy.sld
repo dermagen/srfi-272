@@ -220,7 +220,10 @@
                             (if (and (eq? (read-char p) #\8) (eq? (read-char p) lpar))
                                 (list->bytevector (sub-read-list p close-paren #f))
                                 (r-error p "invalid bytevector syntax")))
-                           ((char=? c #\&) (read-char p) (box (sub-read-carefully p)))
+                           ((char=? c #\&) (read-char p) 
+                            (cond-expand
+                              (skint (box (sub-read-carefully p)))
+                              (else (r-error p "unexpected box syntax"))))
                            ((char=? c #\u)
                             (read-char p)
                             (if (and (eq? (read-char p) #\8) (eq? (read-char p) lpar))
