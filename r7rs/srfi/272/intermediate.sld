@@ -647,7 +647,7 @@
         (let ((ind (fit-ind x ind v)))
           (emit-lpar)
           (let ((ind (ind+ ind 1)) (v (nest v)))
-            (if (and (symbol? (car x)) (pair? (cdr x)))
+            (if (and (symbol? (car x)) (pair? (cdr x)) (not (cuti? v)))
                 (let ((oplen (atom-width (car x))))
                   (if (< oplen (alt-indent ind)) ; ind = len + 1 space
                       (begin

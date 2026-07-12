@@ -155,8 +155,8 @@
     ; print square brackets around selected subforms
     (define pp-brackets (make-parameter #f cv-boolean))
     
-    ; print argument obj as code, opposed to data -- call it pp-as-code?
-    (define pp-code (make-parameter #f cv-boolean))
+    ; print argument obj as code, opposed to data
+    (define pp-code (make-parameter #t cv-boolean))
     
     ; if false, prints in a single line with 1 space for separation, observing all flags
     ; other than those related to spacing and line wrapping (pp-width and others)
@@ -877,7 +877,6 @@
         (define (fitsi? e c v)
           (if (cuti? v) (csub c cuti-wid) (fits? e c v)))
         (define (refi x i v) (if (cuti? v) 42 (reff x i)))
-        ;(when *dbg* (format #t "<<< ~s >>>~%" `(print-vector-like ,x ,pfx ,sfx)))
         (emit pfx)
         (let
           ((n (lenf x))
@@ -995,7 +994,7 @@
         (let ((ind (fit-ind x ind v)))
           (emit-lpar)
           (let ((ind (ind+ ind 1)) (v (nest v)))
-            (if (and (symbol? (car x)) (pair? (cdr x)))
+            (if (and (symbol? (car x)) (pair? (cdr x)) (not (cuti? v)))
                 (let ((oplen (atom-width (car x))))
                   (if (< oplen (alt-indent ind)) ; ind = len + 1 space
                       (begin
@@ -1183,7 +1182,6 @@
                           =>
                           (lambda (r)
                             (define indr (if (integer? r) (ind+ ind r) #f))
-                            ;(when *dbg* (format #t "<<< ~s >>>~%" `(ploop ,e ,c ,v ,ind ,ind1 ,indr)))
                             (space #f v)
                             (ploop l e v ind ind1 indr c (fmcdr fmt*))))
                          ((and (csub c 1) (fitsi? e c v))
