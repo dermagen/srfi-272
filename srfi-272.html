@@ -994,6 +994,37 @@ changes in behavior depend only on the parameter values, not on the method by wh
 </p>
 
 <p>
+  Also, while processing top-level line comments, <code>pprint-file</code>
+  in decoration mode must recognize special ‘style comments’, extracting custom formatting 
+  instructions embedded within them. This allows one to dynamically extend the pretty printer on a per-file 
+  basis by assigning specific formatting rules to new identifiers. To be processed, a style comment must 
+  have the following general structure:
+</p>
+<pre><code>;; * pp-styles:</code> <i>symbol</i> <code>:=</code> <i>style</i> [ <code>;</code> <i>symbol</i> <code>:=</code> <i>style</i> ... ]</pre>
+
+<p>
+    A style comment begins with one or more semicolons, followed by whitespace, followed by the 
+    literal prefix <code>* pp-styles:</code>. This is immediately followed 
+    by the target symbol&thinsp;—&thinsp;the Scheme identifier requiring custom layout 
+    rules&thinsp;—&thinsp;which is bound via the literal assignment operator <code>:=</code> to its style value. 
+    This value can be an inherited style, represented by a standalone symbol naming an already-styled 
+    identifier such as <code>let</code> or <code>define</code>, or an explicit style object representation&thinsp;—&thinsp; 
+    an S-expression starting with an underscore that conforms to the style object S-expression grammar 
+    described above. Multiple assignments can be chained sequentially within a single comment by separating 
+    them with a semicolon. Spaces and tabs are used as inter-token space in the usual way.
+    Examples:
+</p>
+  <p>Inheriting an existing style:</p>
+  <pre><code>; * pp-styles: my-let-macro := let</code></pre>
+
+  <p>Applying an explicit style definition:</p>
+  <pre><code>;; * pp-styles: define-widget := (_ i? . body)</code></pre>
+
+  <p>Chaining multiple style declarations on a single line:</p>
+  <pre><code>;;; * pp-styles: my-let := let ; define-widget := (_ i? . body)</code>
+  </pre>
+
+<p>
   <code>(<b>pprint-file/html</b></code> &langle;<i>infile</i>&thinsp;&rangle; &langle;<i>keyword argument</i>&hellip;&rangle;<code>)</code>
   &nbsp;&nbsp;<i>procedure</i><br/>
   <code>(<b>pprint-file/html</b></code> &langle;<i>infile</i>&thinsp;&rangle; &langle;<i>outfile</i>&thinsp;&rangle; &langle;<i>keyword argument</i>&hellip;&rangle;<code>)</code>

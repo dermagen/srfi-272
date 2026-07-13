@@ -1,3 +1,7 @@
+; SPDX-FileCopyrightText: 2026 Sergei Egorov
+;
+; SPDX-License-Identifier: MIT
+
 (import (scheme base) (scheme read) (scheme write))
 (import (srfi 272 basic))
 
