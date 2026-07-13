@@ -2,9 +2,9 @@
 ;
 ; SPDX-License-Identifier: MIT
 
-;; -*- mode: scheme; fill-column: 90; pp-inline-width: 70; pp-max-tab: 5; pp-brackets: t -*-
+;; -*- mode: scheme; fill-column: 90; pp-inline-width: 70; pp-max-tab: 5 -*-
 
-(import (scheme base) (scheme write))
+(import (scheme base) (scheme read) (scheme write))
 (import (srfi 272 advanced))
 ;(import (srfi 272 colorize))
 
@@ -61,7 +61,7 @@
 (pp-test 40 "`(,a ,@b)" "`(,a ,@b)\n")
 (pp-test 80
   "(let ((x 1) (y 2) (zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz 3)) (display x) (display y))"
-  "(let\n ((x 1)\n  (y 2)\n  (zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz 3))\n (display x)\n (display y))\n")
+  "(let\n  ((x 1)\n   (y 2)\n   (zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz 3))\n  (display x)\n  (display y))\n")
 
 ; graph cycles tests (default mode)
 (pp-test 40 "#0=(a . #0#)" "#0=(a . #0#)\n")
@@ -73,7 +73,7 @@
 (pp-test 40 "(#0=(a b . #0#) '#1=(a b a b . #1#))"
   "(#0=(a b . #0#) '#1=(a b a b . #1#))\n")
 (pp-test 40 "(#0=(1 . 2) #1=(1 . 2) #2=(3 . 4) #0# #1# #2#)"
-  "((1 . 2)\n (1 . 2)\n (3 . 4)\n (1 . 2)\n (1 . 2)\n (3 . 4))\n")
+  "((1 . 2) (1 . 2) (3 . 4) (1 . 2) (1 . 2)\n  (3 . 4))\n")
 (pp-test 40 "#0=((1 . 2) (1 . 2) (3 . 4) . #0#)"
   "#0=((1 . 2) (1 . 2) (3 . 4) . #0#)\n")
 (pp-test 40 "#0=#(#0#)" "#0=#(#0#)\n")
@@ -115,7 +115,7 @@
   (pp-test 40 "(#0=(a b . #0#) '#1=(a b a b . #1#))"
     "(#0=(a b . #0#) '#1=(a b a b . #1#))\n")
   (pp-test 40 "(#0=(1 . 2) #1=(1 . 2) #2=(3 . 4) #0# #1# #2#)"
-    "(#0=(1 . 2)\n #1=(1 . 2)\n #2=(3 . 4)\n #0#\n #1#\n #2#)\n")
+    "(#0=(1 . 2) #1=(1 . 2) #2=(3 . 4) #0#\n  #1# #2#)\n")
   (pp-test 40 "#0=((1 . 2) (1 . 2) (3 . 4) . #0#)"
     "#0=((1 . 2) (1 . 2) (3 . 4) . #0#)\n")
   (pp-test 40 "#0=#(#0#)" "#0=#(#0#)\n")
@@ -330,6 +330,15 @@
 (test-cut 1 1 "#0='#0#" "#0='#0#\n")
 
 ; skint boxes increment level
+(cond-expand
+  (skint
+   (test-cut 3 4 "#&#&#&#&(3 . #(a b c d e f g))))" "#&#&#&#&...\n")
+   (test-cut 0 0 "#0=#&#0#" "#&...\n")
+   (test-cut 0 1 "#0=#&#0#" "#&...\n")
+   (test-cut 1 0 "#0=#&#0#" "#&...\n") ; Chez gives "#&#&...\n" !
+   (test-cut 1 1 "#0=#&#0#" "#&#&...\n"))
+  (else))
+
 (display "Done.")
 (newline)
 
