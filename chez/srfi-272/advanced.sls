@@ -24,7 +24,7 @@
   (rnrs base) (rnrs lists) (rnrs control) (rnrs unicode)
   (rnrs mutable-pairs) (rnrs io simple) (rnrs io ports)
   (rnrs bytevectors) (rnrs exceptions)
-  (srfi-272 colorize)
+  (srfi-272 measure) (srfi-272 colorize)
   (only (chezscheme)
     box? box unbox set-box!
     pretty-print pretty-file pretty-format 
@@ -36,11 +36,9 @@
     make-parameter open-output-string get-output-string
     open-input-string define-values))
 
-(define (char-width ch) (if (char<=? #\space ch #\~) 1 #f))
-(define char-width-procedure (make-parameter char-width))
+(define char-width (char-width-procedure))
 (define write-string display)
 (define (pperror msg . args) (apply error 'pp msg args))
-(define read-line get-line)
 
 (define (cv-width x)
   (if (and (number? x) (exact? x) (> x 0))
@@ -1176,10 +1174,25 @@
     (if (and (pair? rest) (string? (car rest)))
         (values (car rest) (cdr rest))
         (values #f rest)))
-  (define decorate?
-    (cond [(memq pp-decorate kv*) =>
+  (define (getpar pp-xxx)
+    (cond [(memq pp-xxx kv*) =>
            (lambda (p) (and (pair? (cdr p)) (cadr p)))]
-          [else (pp-decorate)]))
+          [else (pp-xxx)]))
+  (define color (getpar pp-color))
+  (define cm
+    (if (semantic-color-mapper? color)
+        color
+        default-semantic-color-mapper))
+  (define decorate? (getpar pp-decorate))
+  (define emit write-string) ; ignore overrides
+  (define tint write-string) ; ignore overrides
+  (define (copy-comment line op)
+    (when color
+      (tint (semantic-color->start-string 'comment cm) op))
+    (emit line op)
+    (when color
+      (tint (semantic-color->end-string 'comment cm) op))
+    (emit "\n" op))
   (define (parse-magic-line line)
     (define (skip-while p pred)
       (let ([c (peek-char p)])
@@ -1217,13 +1230,12 @@
   (define (copy-top-line-comments ip op in-header?)
     (copy-whitespace ip op)
     (when (eqv? (peek-char ip) #\;)
-      (let ([line (read-line ip)])
+      (let ([line (get-line ip)])
         (cond [(and in-header? (parse-magic-line line)) =>
                (lambda (kvs)
                  (set! kv* (append kv* kvs))
                  (set! in-header? #f))])
-        (display line op)
-        (newline op)
+        (copy-comment line op)
         (copy-top-line-comments ip op in-header?))))
   (define (pf ip op)
     (let loop ([in-header? #t])
