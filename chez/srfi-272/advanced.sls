@@ -203,10 +203,24 @@
 (define (lookup-pp-style styles key)
   (cond [(assq key styles) => cdr] [else #f]))
     
+; style object validator
+(define (valid-style? obj)
+  (define (valid-fmt-tail? x)
+    (or (and (memq x '(body spread fill h* dc* ec* fc* lc*)) #t)
+        (and (pair? x) (eq? (car x) 'i?) (valid-fmt-tail? (cdr x)))
+        (and (pair? x) (valid-fmt? (car x)) (valid-fmt-tail? (cdr x)))))
+  (define (valid-fmt? x)
+    (or (and (memq x '(k i h d dc e ec f fc l lc)) #t)
+        (valid-fmt-tail? x)))
+  (and (pair? obj) (eq? (car obj) '_)
+       (valid-fmt-tail? (cdr obj))))
+
 ; adding a style to the explicit hook registry
 (define (add-pp-style styles key style)
   (if style
-      (alist-addv key style styles)
+      (if (valid-style? style)
+          (alist-addv key style styles)
+          (pperror "invalid style object" style))
       (alist-remv key styles)))
     
 ; public interface to formatting style registry
@@ -1316,7 +1330,7 @@
     (or . fill)
     (import . fill)
     (export . fill)
-    (delay e)
+    (delay . fill)
     (guard (f . ec*) . body)
     (case-lambda . fc*)
     (cond-expand . dc*)
