@@ -66,6 +66,7 @@ SPDX-License-Identifier: MIT
       <li><a href="#the-srfi-272-fancy-library">The (srfi 272 fancy) library</a></li>
       <li><a href="#the-srfi-272-colorize-library">The (srfi 272 colorize) library</a></li>
       <li><a href="#the-srfi-272-measure-library">The (srfi 272 measure) library</a></li>
+      <li><a href="#the-srfi-272-show-library">The (srfi 272 show) library</a></li>
     </ul>
   </li>
   <li><a href="#references">References</a></li>
@@ -1228,6 +1229,74 @@ changes in behavior depend only on the parameter values, not on the method by wh
   encouraged to mimic the behavior of the <code>wcwidth</code> C procedure on their system,
   preferably by wrapping it directly.
 </p>
+
+<h3 id="the-srfi-272-show-library">The <code>(srfi 272 show)</code> library</h3>
+
+<p>
+  This optional library should be supported if both the <code>(srfi 166)</code>
+  and <code>(srfi 272 advanced)</code> libraries are supported. It uses the advanced library's
+  <code>make-pprint-generator</code> procedure to integrate advanced pretty printing with the
+  Monadic Formatting framework. It re-exports all parameters with the <code>pp-</code> prefix
+  from the advanced library, as well as two procedures returning SRFI 166 formatters:
+</p>
+
+<p>
+  <code>(<b>pprinted</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>keyword argument</i>&hellip;&rangle;<code>)</code>
+  &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
+
+  This procedure is similar to the SRFI 166 <code>pretty</code> formatter procedure, but uses the advanced
+  printer internally. Like the <code>pp</code> procedure, it accepts additional keyword arguments in the
+  form of alternating key and value expressions. Each key expression must evaluate to a parameter object 
+  available through the advanced printing library. Each value expression must evaluate to an object
+  acceptable as a value for the preceding parameter.<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;The <code>pp-width</code> parameter is treated specially: for the internal
+  printer call the value of the SRFI 166's <code>width</code> state variable overrides any explicitly
+  or implicitly specified value of <code>pp-width</code>. 
+</p>
+
+<p>
+  <code>(<b>pprinted*</b></code> &langle;<i>obj</i>&thinsp;&rangle; &langle;<i>keyword argument</i>&hellip;&rangle;
+  &langle;<i>keyword argument list</i>&thinsp;&rangle;<code>)</code> &nbsp;&nbsp;<i>procedure</i><br class="hsp"/>
+
+  This variant of <code>pprinted</code> accepts keyword arguments followed by a final expression that must evaluate to a proper
+  list of alternating keys and values. This final list is effectively ‘spliced’ into the call, as if its contents were
+  passed to the printer via <code>apply</code>.
+</p>
+
+<p>Example (borrowed from SRFI 166 for comparison):</p>
+
+<pre><code>(import (srfi 166) (srfi 272 show))
+
+(define func
+  '(define (fold kons knil ls)
+     (let lp ((ls ls) (acc knil))
+       (if (null? ls) acc (lp (cdr ls) (kons (car ls) acc))))))
+
+(define doc
+  (string-append
+    "The fundamental list iterator.  Applies KONS to each "
+    "element of LS and the result of the previous application, "
+    "beginning with KNIL.  With KONS as CONS and KNIL as '(), "
+    "equivalent to REVERSE."))
+
+(show #t (columnar (pprinted func pp-brackets #t) " ; " (justified doc)))
+
+(define (fold kons knil ls)           ; The    fundamental   list   iterator.
+  (let lp ([ls ls] [acc knil])        ; Applies   KONS  to  each  element  of
+    (if (null? ls)                    ; LS  and  the  result  of the previous
+        acc                           ; application,   beginning  with  KNIL.
+        (lp (cdr ls)                  ; With  KONS  as  CONS and KNIL as '(),
+            (kons (car ls) acc)))))   ; equivalent to REVERSE.
+</code></pre>
+
+<p>
+  <small>
+  Note: if the <code>pp-color</code> parameter is set to a true value, and columnar mode is
+  used, the SRFI 166 <code>terminal-aware</code> wrapper should be used to ensure that
+  terminal color sequences are not counted in column width calculations.
+  </small>
+</p>
+
 
 <h2 id="references">References</h2>
 
