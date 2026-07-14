@@ -315,13 +315,19 @@
         (close-output-port p)
         (string-width s)))
     
+    ; check if printing x without spacing would interfere with read macro
+    (define (interferes-with-splicing-macro? x)
+      (and (symbol? x)
+           (let ((s (symbol->string x)))
+             (and (> (string-length s) 0) (char=? (string-ref s 0) #\@)))))
+    
     ; this list should contain rmacs supported by the reader by default
-    ; fixme: add a way to space ,@ if followed by a symbol that starts with @
+    ; NB: last boolean param is hsv, "has splicing variant"
     (define builtin-read-macros
-      '((quote "'" 0)
-        (quasiquote "`" 1)
-        (unquote "," -1)
-        (unquote-splicing ",@" -1)))
+      '((quote "'" 0 #f)
+        (quasiquote "`" 1 #f)
+        (unquote "," -1 #t)
+        (unquote-splicing ",@" -1 #f)))
     
     ; the body of the formatter is embeded into pp to allow direct
     ; access to the external parameters through the local environment
@@ -426,13 +432,14 @@
         (if (string? *level-stub*)
             (let ((w (string-width *level-stub*)))
               (lambda (x)
-                (dispatch-on-type x (lambda (pfx reff tomf dde) w)
+                (dispatch-on-type x (lambda (pfx reff tomf dde hsv) w)
                   (lambda (pfx tolf toxf sfx) w)
                   (lambda (pfx lenf reff sfx) w)
                   (lambda (sh? widf wrtf) (widf x))))) ; atom
             (lambda (x)
               (dispatch-on-type x
-                (lambda (pfx reff tomf dde) (+ (string-width pfx) cuti-wid))
+                (lambda (pfx reff tomf dde hsv)
+                  (+ (string-width pfx) cuti-wid))
                 (lambda (pfx tolf toxf sfx)
                   (+ (string-width pfx) cuti-wid (string-width sfx)))
                 (lambda (pfx lenf reff sfx)
@@ -514,7 +521,7 @@
         (if (string? *level-stub*) ; CL-like model
             (lambda (x bk?)
               (dispatch-on-type x
-                (lambda (pfx reff tomf dde) (emit *level-stub*))
+                (lambda (pfx reff tomf dde hsv) (emit *level-stub*))
                 (lambda (pfx tolf toxf sfx) (emit *level-stub*))
                 (lambda (pfx lenf reff sfx) (emit *level-stub*))
                 (lambda (sh? widf wrtf) (emit/wrtf wrtf x)))) ; atoms
@@ -523,7 +530,7 @@
               (cond ((and bk? (pair? x)) (emit-lbra) (emit-cuti) (emit-rbra))
                     (else
                      (dispatch-on-type x
-                       (lambda (pfx reff tomf dde) (emit pfx) (emit-cuti))
+                       (lambda (pfx reff tomf dde hsv) (emit pfx) (emit-cuti))
                        (lambda (pfx tolf toxf sfx)
                          (emit pfx)
                          (emit-cuti)
@@ -577,7 +584,8 @@
                              (assq (car x) builtin-read-macros))
                         =>
                         (lambda (l)
-                          (retm (cadr l) cadr (lambda (x) (list (car l) x)) (caddr l))))
+                          (retm (cadr l) cadr (lambda (x) (list (car l) x)) (caddr l)
+                                (cadddr l))))
                        ((pair? x) (retl "(" (lambda (x) x) (lambda (x) x) ")"))
                        ((vector? x) (retl "#(" vector->list list->vector ")"))
                        ((string? x) ; shareable atomic
@@ -619,7 +627,7 @@
           (let scan ((x sexp) (v env))
             (unless (not-shareable? x)
               (dispatch-on-type x
-                (lambda (pfx reff tomf dde)
+                (lambda (pfx reff tomf dde hsv)
                   (unless (cutd? v)
                     (let ((c (table-ref counts x 0)))
                       (table-set! counts x (+ c 1))
@@ -661,7 +669,7 @@
                          (let ((up (if (> c 1) (cons x up) up)))
                            (table-set! counts x 'visited)
                            (dispatch-on-type x
-                             (lambda (pfx reff tomf dde)
+                             (lambda (pfx reff tomf dde hsv)
                                (unless (cutd? v) (find-cycles (reff x) v up)))
                              (lambda (pfx tolf toxf sfx)
                                (unless (cutd? v)
@@ -690,7 +698,7 @@
                             (recur x v)))))
                 (define (recur x v)
                   (dispatch-on-type x
-                    (lambda (pfx reff tomf dde)
+                    (lambda (pfx reff tomf dde hsv)
                       (if (cutd? v)
                           x
                           (let* ((e (reff x)) (ne (rebuild e v)))
@@ -777,7 +785,7 @@
               ((cutd? v) (csub c (cutd-widf x)))
               (else
                (dispatch-on-type x
-                 (lambda (pfx reff tomf dde)
+                 (lambda (pfx reff tomf dde hsv)
                    (fits-read-macro? x c v pfx (reff x)))
                  (lambda (pfx tolf toxf sfx)
                    (fits-list-like? x c v pfx (tolf x) sfx))
@@ -806,9 +814,12 @@
             (let ((ilen (atom-width id)))
               (print x (ind+ ind (+ ilen 2)) v)))))
       
-      (define (print-read-macro x ind v pfx elt print)
+      (define (print-read-macro x ind v pfx hsv elt print)
+        (define sep
+          (and hsv (interferes-with-splicing-macro? elt) " "))
         (emit pfx)
-        (let ((ind (ind+ ind (string-width pfx))))
+        (when sep (emit sep))
+        (let ((ind (ind+ ind (+ (string-width pfx) (if sep 1 0)))))
           (print elt ind v))) ; Caveat: no nesting!
       
       ; fill-style printing of (possibly improper) list contents
@@ -919,8 +930,8 @@
               ((cutd? v) (print-cutd x #f)) ; no brackets w/o fmt!
               (else
                (dispatch-on-type x
-                 (lambda (pfx reff tomf dde)
-                   (print-read-macro x ind v pfx (reff x) print-datum))
+                 (lambda (pfx reff tomf dde hsv)
+                   (print-read-macro x ind v pfx hsv (reff x) print-datum))
                  (lambda (pfx tolf toxf sfx)
                    (print-list-like x ind v pfx (tolf x) sfx print-datum))
                  (lambda (pfx lenf reff sfx)
@@ -940,8 +951,8 @@
               ((cutd? v) (print-cutd x #f)) ; no brackets w/o fmt!
               (else
                (dispatch-on-type x
-                 (lambda (pfx reff tomf dde)
-                   (print-read-macro x ind v pfx (reff x) print-literal))
+                 (lambda (pfx reff tomf dde hsv)
+                   (print-read-macro x ind v pfx hsv (reff x) print-literal))
                  (lambda (pfx tolf toxf sfx)
                    (print-list-like x ind v pfx (tolf x) sfx print-literal))
                  (lambda (pfx lenf reff sfx)
@@ -964,8 +975,9 @@
               ((cutd? v) (print-cutd x #f)) ; no brackets w/o fmt!
               (else
                (dispatch-on-type x
-                 (lambda (pfx reff tomf dde)
-                   (print-read-macro x ind v pfx (reff x) (subprt (+ de dde))))
+                 (lambda (pfx reff tomf dde hsv)
+                   (print-read-macro x ind v pfx hsv (reff x)
+                     (subprt (+ de dde))))
                  (lambda (pfx tolf toxf sfx)
                    (print-list-like x ind v pfx (tolf x) sfx (subprt de)))
                  (lambda (pfx lenf reff sfx)
@@ -1069,15 +1081,15 @@
               ((cutd? v) (print-cutd x #f)) ; no brackets w/o fmt!
               (else
                (dispatch-on-type x
-                 (lambda (pfx reff tomf dde)
+                 (lambda (pfx reff tomf dde hsv)
                    (cond ((<= dde 0)
                           (let ((sc (if (= dde 0) 'literal 'warning)))
                             (emit/sc-start sc)
-                            (print-read-macro x ind v pfx (reff x) print-datum)
+                            (print-read-macro x ind v pfx hsv (reff x) print-datum)
                             (emit/sc-end sc)))
                          (else
                           (emit/sc-start 'literal)
-                          (print-read-macro x ind v pfx (reff x)
+                          (print-read-macro x ind v pfx hsv (reff x)
                             (lambda (x ind v) (print-template x ind v dde)))
                           (emit/sc-end 'literal))))
                  (lambda (pfx tolf toxf sfx)
@@ -1429,10 +1441,10 @@
       (syntax-case
        (set! builtin-read-macros
          (append
-           '((syntax "#'" 0)
-             (quasisyntax "#`" 1)
-             (unsyntax "#," -1)
-             (unsyntax-splicing "#,@" -1))
+           '((syntax "#'" 0 #f)
+             (quasisyntax "#`" 1 #f)
+             (unsyntax "#," -1 #t)
+             (unsyntax-splicing "#,@" -1 #f))
            builtin-read-macros))
        (for-each
          (lambda (x) (pretty-style (car x) (cons '_ (cdr x))))
